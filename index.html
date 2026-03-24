@@ -1,0 +1,2894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LTPCS · LaSalle Thermal Pollution Control System</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alata&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#05080f; --surface:#090e1a; --panel:#0b1422; --panel2:#0e1a2e;
+  --border:#152840; --border2:#1d3554;
+  --accent:#00d4ff; --aglow:rgba(0,212,255,0.14);
+  --a2:#ff6b35; --a3:#39ff14; --a4:#ffcc00; --a5:#a855f7;
+  --bad:#ff3b3b; --mid:#ffcc00; --good:#39ff14;
+  --text:#b8d4e8; --text2:#6a8faa; --muted:#334d66;
+  --nav-h:62px; --top-h:54px; --sw:268px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;height:100%;overflow:hidden;position:fixed;width:100%;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(0,212,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.02) 1px,transparent 1px);
+  background-size:32px 32px;}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:10px;}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--accent),transparent 60%);opacity:.4;}
+.tb-left{display:flex;align-items:center;gap:10px;}
+.menu-btn{width:38px;height:38px;border:1px solid var(--border2);background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;flex-shrink:0;border-radius:2px;}
+.menu-btn span{width:16px;height:1.5px;background:var(--accent);display:block;transition:all .3s;}
+.menu-btn.open span:nth-child(1){transform:rotate(45deg) translate(4.5px,4.5px);}
+.menu-btn.open span:nth-child(2){opacity:0;}
+.menu-btn.open span:nth-child(3){transform:rotate(-45deg) translate(4.5px,-4.5px);}
+.brand{display:flex;align-items:center;gap:8px;}
+.brand-hex{width:28px;height:28px;flex-shrink:0;background:linear-gradient(135deg,var(--accent),#006aff);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:.7rem;}
+.brand-name{font-family:'Alata',sans-serif;font-weight:700;font-size:1rem;letter-spacing:2px;color:var(--accent);text-transform:uppercase;line-height:1;}
+.brand-sub{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--muted);letter-spacing:1px;}
+.tb-right{display:flex;align-items:center;gap:8px;}
+.tb-clock{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--accent);letter-spacing:1px;}
+.tb-icon{width:36px;height:36px;border:1px solid var(--border2);background:var(--panel);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;position:relative;border-radius:2px;}
+.notif-dot{position:absolute;top:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:var(--bad);font-family:'Share Tech Mono',monospace;font-size:.45rem;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 0 6px var(--bad);}
+
+/* ── SIDEBAR OVERLAY ── */
+.overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(2px);}
+.overlay.open{opacity:1;pointer-events:all;}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;top:0;left:0;bottom:0;z-index:400;width:var(--sw);background:var(--surface);border-right:1px solid var(--border);transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden;}
+.sidebar.open{transform:translateX(0);}
+.sid-head{height:var(--top-h);display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sid-user{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.sid-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#0055bb,var(--accent));display:flex;align-items:center;justify-content:center;font-family:'Alata',sans-serif;font-weight:700;font-size:.8rem;color:#fff;}
+.sid-name{font-family:'Alata',sans-serif;font-size:.9rem;font-weight:700;line-height:1;}
+.sid-role{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--muted);letter-spacing:1px;margin-top:1px;}
+.sid-close{font-size:1.1rem;cursor:pointer;color:var(--text2);padding:6px;}
+
+.sid-body{flex:1;overflow-y:auto;padding:6px 0;}
+.sid-sec{font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;padding:10px 14px 4px;}
+.sid-item{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;font-family:'Exo 2',sans-serif;font-size:.86rem;font-weight:500;color:var(--text2);border-left:2px solid transparent;transition:all .15s;}
+.sid-item:active{background:rgba(255,255,255,.03);}
+.sid-item.active{color:var(--accent);background:var(--aglow);border-left-color:var(--accent);}
+.sid-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
+.sid-badge{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:.52rem;padding:1px 5px;border-radius:2px;}
+.sb-red{background:rgba(255,59,59,.2);color:var(--bad);border:1px solid rgba(255,59,59,.3);}
+.sb-grn{background:rgba(57,255,20,.1);color:var(--good);border:1px solid rgba(57,255,20,.3);}
+.sid-div{height:1px;background:var(--border);margin:6px 12px;}
+
+/* ── SYSTEM STATUS FOOTER ── */
+.sid-foot{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0;}
+.sys-ft-title{font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:2px;color:var(--muted);margin-bottom:6px;}
+.sys-row{display:flex;align-items:center;justify-content:space-between;padding:2px 0;}
+.sys-nm{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text2);}
+.sdot{width:6px;height:6px;border-radius:50%;box-shadow:0 0 5px currentColor;}
+.ok{color:var(--good);}.wn{color:var(--mid);}.er{color:var(--bad);}
+
+/* ── MAIN ── */
+.main{position:fixed;top:var(--top-h);left:0;right:0;bottom:var(--nav-h);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;z-index:1;}
+.page{display:none;padding:12px;flex-direction:column;gap:12px;animation:fadeUp .25s ease;}
+.page.active{display:flex;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;height:var(--nav-h);background:var(--surface);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0);}
+.bnav::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.25;}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:all .15s;position:relative;}
+.bn:active{background:rgba(255,255,255,.03);}
+.bn.active::before{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+.bn-icon{font-size:1.2rem;transition:transform .15s;}
+.bn.active .bn-icon{transform:scale(1.15);}
+.bn-lbl{font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:.5px;color:var(--muted);transition:color .15s;}
+.bn.active .bn-lbl{color:var(--accent);}
+.bn-badge{position:absolute;top:6px;right:calc(50% - 16px);width:14px;height:14px;border-radius:50%;background:var(--bad);font-family:'Share Tech Mono',monospace;font-size:.45rem;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 0 6px var(--bad);}
+
+/* ── ALERT TICKER ── */
+.ticker{background:rgba(255,59,59,.06);border:1px solid rgba(255,59,59,.2);border-left:3px solid var(--bad);padding:8px 12px;overflow:hidden;white-space:nowrap;display:flex;align-items:center;gap:8px;}
+.tdot{width:6px;height:6px;border-radius:50%;background:var(--bad);box-shadow:0 0 6px var(--bad);animation:blink 1s step-end infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.ttext{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--bad);letter-spacing:.5px;display:inline-block;animation:ticker 22s linear infinite;}
+@keyframes ticker{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+
+/* ── PAGE HEADER ── */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.ph-title{font-family:'Alata',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.ph-sub{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:1px;margin-top:1px;}
+.ph-act{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0;}
+
+/* ── CARD ── */
+.card{background:var(--panel);border:1px solid var(--border);padding:14px;position:relative;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--accent),transparent 50%);opacity:.25;}
+.ct{font-family:'Alata',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+
+/* ── KPI SCROLL ── */
+.kpi-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.kpi-scroll::-webkit-scrollbar{display:none;}
+.kpi{flex-shrink:0;width:142px;background:var(--panel);border:1px solid var(--border);padding:12px;position:relative;overflow:hidden;}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.kc1::after{background:#00b4d8;}.kc2::after{background:var(--a2);}.kc3::after{background:var(--a3);}.kc4::after{background:var(--a4);}.kc5::after{background:var(--a5);}
+.kpi-lbl{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--muted);letter-spacing:.5px;margin-bottom:5px;line-height:1.3;}
+.kpi-val{font-family:'Alata',sans-serif;font-size:1.5rem;font-weight:700;line-height:1;}
+.kpi-unit{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--muted);}
+.kpi-ch{font-family:'Share Tech Mono',monospace;font-size:.55rem;margin-top:4px;}
+.up{color:var(--bad);}.dn{color:var(--good);}.st{color:var(--muted);}
+
+/* ── CTRL ROW ── */
+.ctrl{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.ctrl:last-child{border-bottom:none;}
+.ctrl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.cl{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;flex:1;}
+.cv-wrap{display:flex;align-items:baseline;gap:4px;}
+.cv{font-family:'Alata',sans-serif;font-size:1.1rem;font-weight:700;}
+.cu{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--muted);}
+
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:3px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);cursor:pointer;}
+.sl-b{background:linear-gradient(90deg,#00b4d8 0%,#00b4d8 var(--p,50%),var(--border2) var(--p,50%),var(--border2) 100%);}
+.sl-o{background:linear-gradient(90deg,var(--a2) 0%,var(--a2) var(--p,60%),var(--border2) var(--p,60%),var(--border2) 100%);}
+.sl-g{background:linear-gradient(90deg,var(--a3) 0%,var(--a3) var(--p,70%),var(--border2) var(--p,70%),var(--border2) 100%);}
+.sl-y{background:linear-gradient(90deg,var(--a4) 0%,var(--a4) var(--p,40%),var(--border2) var(--p,40%),var(--border2) 100%);}
+
+.trow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.trow:last-child{border-bottom:none;}
+.t-lbl{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.5px;}
+.t-sub{font-family:'Exo 2',sans-serif;font-size:.82rem;font-weight:500;color:var(--text);}
+.toggle{width:42px;height:22px;border-radius:11px;background:var(--border2);position:relative;cursor:pointer;transition:background .3s;flex-shrink:0;}
+.toggle.on{background:var(--a3);box-shadow:0 0 10px rgba(57,255,20,.25);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .3s;}
+.toggle.on::after{left:23px;}
+.ctrl-select{width:100%;background:var(--panel2);border:1px solid var(--border2);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.65rem;padding:9px 10px;outline:none;letter-spacing:.5px;border-radius:2px;margin-top:4px;cursor:pointer;}
+
+/* ── CHIP ── */
+.chip{display:inline-flex;align-items:center;gap:4px;font-family:'Share Tech Mono',monospace;font-size:.56rem;padding:2px 7px;border-radius:2px;letter-spacing:.5px;}
+.c-ok{background:rgba(57,255,20,.1);color:var(--good);border:1px solid rgba(57,255,20,.25);}
+.c-warn{background:rgba(255,204,0,.1);color:var(--mid);border:1px solid rgba(255,204,0,.25);}
+.c-bad{background:rgba(255,59,59,.1);color:var(--bad);border:1px solid rgba(255,59,59,.25);}
+.c-info{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.25);}
+.cdot{width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 4px currentColor;}
+
+/* ── BAR ── */
+.bar-bg{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-top:6px;}
+.bar{height:100%;border-radius:3px;position:relative;}
+.bar::after{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;background:rgba(255,255,255,.5);filter:blur(1px);}
+
+/* ── BUTTON ── */
+.btn{font-family:'Alata',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:9px 16px;border:1px solid;cursor:pointer;background:transparent;display:inline-flex;align-items:center;gap:6px;border-radius:2px;white-space:nowrap;}
+.btn:active{opacity:.7;}
+.b-p{border-color:var(--accent);color:var(--accent);}
+.b-s{border-color:var(--good);color:var(--good);}
+.b-w{border-color:var(--mid);color:var(--mid);}
+.b-d{border-color:var(--bad);color:var(--bad);}
+.b-full{width:100%;justify-content:center;margin-top:8px;}
+
+/* ── INPUTS ── */
+.t-input{width:100%;background:var(--panel2);border:1px solid var(--border2);color:var(--text);font-family:'Exo 2',sans-serif;font-size:.85rem;padding:9px 10px;outline:none;border-radius:2px;transition:border-color .2s;}
+.t-input:focus{border-color:var(--accent);}
+.t-num{background:var(--panel2);border:1px solid var(--border2);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:.85rem;padding:8px 10px;outline:none;border-radius:2px;text-align:right;width:110px;}
+.t-num:focus{border-color:var(--accent);}
+
+/* ── SUM ROW ── */
+.srow{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.srow:last-child{border-bottom:none;}
+.slbl{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.5px;flex:1;}
+.sval{font-family:'Alata',sans-serif;font-size:1rem;font-weight:600;text-align:right;}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;min-width:480px;}
+th{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:1px;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border2);font-weight:400;white-space:nowrap;}
+td{font-family:'Exo 2',sans-serif;font-size:.76rem;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
+.td-m{font-family:'Share Tech Mono',monospace;font-size:.68rem;}
+.td-n{font-family:'Alata',sans-serif;font-size:.95rem;font-weight:600;}
+
+/* ── LOG ── */
+.log{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.log:last-child{border-bottom:none;}
+.log-t{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);min-width:44px;margin-top:1px;}
+.log-i{font-size:.9rem;min-width:18px;}
+.log-msg{font-size:.8rem;flex:1;}
+.log-sub{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);margin-top:2px;}
+
+/* ── S ROW ── */
+.s-row{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.s-row:last-child{border-bottom:none;}
+.s-rt{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.s-title{font-family:'Exo 2',sans-serif;font-size:.85rem;font-weight:500;}
+.s-sub{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);margin-top:2px;}
+
+/* ── REPORT CARD ── */
+.rcard{background:var(--panel2);border:1px solid var(--border);padding:12px;margin-bottom:8px;border-radius:2px;}
+.rcard:last-child{margin-bottom:0;}
+
+/* ══════════════════════════════════════
+   SYSTEMS MANAGEMENT PAGE
+══════════════════════════════════════ */
+
+/* System switcher strip */
+.sys-switcher{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;align-items:stretch;}
+.sys-switcher::-webkit-scrollbar{display:none;}
+.sys-tab{flex-shrink:0;min-width:130px;background:var(--panel);border:1px solid var(--border);padding:10px 12px;cursor:pointer;transition:all .2s;position:relative;border-radius:2px;}
+.sys-tab:active{opacity:.8;}
+.sys-tab.active{border-color:var(--accent);background:var(--aglow);}
+.sys-tab.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);}
+.sys-tab-name{font-family:'Alata',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sys-tab.active .sys-tab-name{color:var(--accent);}
+.sys-tab-id{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--muted);letter-spacing:.5px;margin-top:2px;}
+.sys-tab-status{display:flex;align-items:center;gap:4px;margin-top:5px;}
+.sys-tab-dot{width:5px;height:5px;border-radius:50%;box-shadow:0 0 4px currentColor;}
+.sys-tab-slbl{font-family:'Share Tech Mono',monospace;font-size:.5rem;letter-spacing:.5px;}
+.sys-add-btn{flex-shrink:0;min-width:50px;background:transparent;border:1px dashed var(--border2);padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:var(--muted);transition:all .2s;border-radius:2px;}
+.sys-add-btn:active,.sys-add-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Systems grid on Manage page */
+.sys-grid{display:grid;grid-template-columns:1fr;gap:10px;}
+.sys-card{background:var(--panel);border:1px solid var(--border);padding:14px;position:relative;border-radius:2px;cursor:pointer;transition:border-color .2s;}
+.sys-card:active{border-color:var(--border2);}
+.sys-card.active-sys{border-color:var(--accent);}
+.sys-card.active-sys::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),#006aff);}
+.sys-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.sys-card-info{display:flex;flex-direction:column;}
+.sys-card-name{font-family:'Alata',sans-serif;font-size:1rem;font-weight:700;letter-spacing:1px;}
+.sys-card-id{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.5px;margin-top:2px;}
+.sys-card-loc{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text2);margin-top:4px;}
+.sys-card-actions{display:flex;gap:6px;flex-shrink:0;}
+.sc-btn{width:32px;height:32px;border:1px solid var(--border2);background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:.85rem;cursor:pointer;border-radius:2px;transition:all .2s;}
+.sc-btn:active{opacity:.7;}
+.sc-btn.edit:hover{border-color:var(--accent);color:var(--accent);}
+.sc-btn.del:hover{border-color:var(--bad);color:var(--bad);}
+.sys-card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+.sc-stat{background:var(--panel2);padding:8px 10px;border-radius:2px;}
+.sc-stat-lbl{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--muted);letter-spacing:.5px;}
+.sc-stat-val{font-family:'Alata',sans-serif;font-size:1.05rem;font-weight:700;margin-top:3px;}
+.sys-card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid var(--border);}
+
+/* ADD SYSTEM MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border);border-bottom:none;width:100%;max-width:560px;border-radius:4px 4px 0 0;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);max-height:90vh;display:flex;flex-direction:column;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.modal-title{font-family:'Alata',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);}
+.modal-close{font-size:1.1rem;cursor:pointer;color:var(--text2);padding:4px 8px;}
+.modal-body{padding:16px;overflow-y:auto;flex:1;}
+.modal-foot{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
+.form-row{margin-bottom:12px;}
+.form-lbl{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:block;}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* Delete confirm */
+.del-modal{max-width:400px;border-radius:4px;}
+.del-modal .modal{border-radius:4px;border:1px solid rgba(255,59,59,.3);max-height:auto;}
+
+/* Current system banner */
+.cur-sys-banner{background:var(--aglow);border:1px solid rgba(0,212,255,.3);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.csb-left{display:flex;align-items:center;gap:10px;}
+.csb-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s ease-in-out infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+.csb-name{font-family:'Alata',sans-serif;font-size:.95rem;font-weight:700;color:var(--accent);}
+.csb-sub{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--text2);margin-top:1px;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:calc(var(--nav-h) + 12px);left:12px;right:12px;z-index:9999;background:var(--panel);border:1px solid var(--border2);border-left:3px solid var(--good);padding:12px 14px;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--good);letter-spacing:.5px;display:none;animation:fadeUp .2s ease;box-shadow:0 4px 20px rgba(0,0,0,.6);border-radius:2px;}
+
+/* Profile */
+.prof-av{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0055bb,var(--accent));display:flex;align-items:center;justify-content:center;font-family:'Alata',sans-serif;font-weight:700;font-size:1.2rem;color:#fff;flex-shrink:0;}
+
+/* ── DESKTOP ── */
+@media(min-width:768px){
+  .sidebar{position:fixed;transform:none;width:248px;z-index:100;}
+  .overlay{display:none!important;}
+  .menu-btn{display:none;}
+  .main{left:248px;}
+  .bnav{left:248px;}
+  .sys-grid{grid-template-columns:1fr 1fr;}
+  .modal-overlay{align-items:center;}
+  .modal{border-radius:4px;border-bottom:1px solid var(--border);}
+  .modal-overlay.open .modal{transform:translateY(0);}
+}
+@media(min-width:1100px){
+  .sidebar{width:262px;}
+  .main{left:262px;}
+  .bnav{left:262px;}
+  .sys-grid{grid-template-columns:1fr 1fr 1fr;}
+}
+
+/* ── ALERT / LOG SELECTION ── */
+.alert-select-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.select-all-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.cb{width:18px;height:18px;border:1.5px solid var(--border2);border-radius:3px;background:var(--panel2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;cursor:pointer;}
+.cb.checked{background:var(--accent);border-color:var(--accent);}
+.cb.checked::after{content:'✓';font-size:.65rem;color:#000;font-weight:700;}
+.cb-label{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.5px;}
+.sel-actions{display:flex;gap:6px;}
+
+.log-item-wrap{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;}
+.log-item-wrap:last-child{border-bottom:none;}
+.log-item-wrap:active{background:rgba(255,255,255,.02);}
+.log-item-wrap.selected{background:rgba(0,212,255,.04);border-left:2px solid var(--accent);padding-left:8px;}
+.log-item-wrap.resolved .log-msg-text{text-decoration:line-through;opacity:.45;}
+.log-item-wrap.resolved .log-status-chip{display:inline-flex;}
+.log-status-chip{display:none;margin-top:3px;}
+.log-content{flex:1;min-width:0;}
+
+.log-severity{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:2px;}
+.sev-icon{font-size:.95rem;}
+.sev-badge{font-family:'Share Tech Mono',monospace;font-size:.45rem;letter-spacing:.5px;padding:1px 4px;border-radius:2px;}
+.sev-critical{background:rgba(255,59,59,.2);color:var(--bad);border:1px solid rgba(255,59,59,.3);}
+.sev-high{background:rgba(255,107,53,.2);color:var(--a2);border:1px solid rgba(255,107,53,.3);}
+.sev-medium{background:rgba(255,204,0,.15);color:var(--mid);border:1px solid rgba(255,204,0,.3);}
+.sev-low{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.25);}
+.sev-info{background:rgba(57,255,20,.08);color:var(--good);border:1px solid rgba(57,255,20,.2);}
+
+.clear-count-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#000;font-family:'Share Tech Mono',monospace;font-size:.55rem;font-weight:700;padding:0 5px;margin-left:4px;}
+
+/* ── LOGIN VERIFICATION MODAL ── */
+.auth-modal-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(6px);}
+.auth-modal-overlay.open{opacity:1;pointer-events:all;}
+.auth-modal{background:var(--surface);border:1px solid var(--border);width:calc(100% - 32px);max-width:380px;border-radius:4px;transform:scale(.95);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+.auth-modal-overlay.open .auth-modal{transform:scale(1);}
+.auth-top{padding:20px 20px 0;}
+.auth-icon{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(0,106,255,.15));border:1px solid rgba(0,212,255,.25);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 14px;}
+.auth-title{font-family:'Alata',sans-serif;font-size:1.05rem;font-weight:700;letter-spacing:1.5px;color:var(--accent);text-align:center;text-transform:uppercase;}
+.auth-sub{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.5px;text-align:center;margin-top:4px;line-height:1.6;}
+.auth-action-desc{background:rgba(255,59,59,.06);border:1px solid rgba(255,59,59,.2);padding:8px 12px;border-radius:2px;margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--bad);letter-spacing:.5px;text-align:center;}
+.auth-body{padding:16px 20px;}
+.auth-field{margin-bottom:12px;}
+.auth-lbl{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px;}
+.auth-input{width:100%;background:var(--panel2);border:1px solid var(--border2);color:var(--text);font-family:'Exo 2',sans-serif;font-size:.9rem;padding:10px 12px;outline:none;border-radius:2px;transition:border-color .2s;}
+.auth-input:focus{border-color:var(--accent);}
+.auth-input.error{border-color:var(--bad);}
+.auth-error{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--bad);letter-spacing:.5px;margin-top:6px;display:none;}
+.auth-error.show{display:block;}
+.auth-attempts{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);text-align:center;margin-bottom:10px;}
+.auth-foot{padding:0 20px 20px;display:flex;flex-direction:column;gap:8px;}
+.auth-hint{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);text-align:center;letter-spacing:.5px;padding-top:4px;}
+
+.lock-icon-animate{animation:lockShake .4s ease;}
+@keyframes lockShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* ── LOG TABS ── */
+.log-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:12px;}
+.log-tab{flex:1;padding:8px 0;font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+.log-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.log-tab-content{display:none;}
+.log-tab-content.active{display:block;}
+
+/* ── RESOLVED SECTION ── */
+.resolved-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.resolved-header{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:1.5px;margin-bottom:8px;}
+
+
+/* ── LIGHT MODE THEME ── */
+body.light {
+  --bg:#f0f4f8; --surface:#ffffff; --panel:#f8fafc; --panel2:#eef2f7;
+  --border:#d0dae6; --border2:#b8cad8;
+  --accent:#0077cc; --aglow:rgba(0,119,204,0.1);
+  --a2:#d94f00; --a3:#1a8c00; --a4:#b38600; --a5:#7c3aed;
+  --bad:#cc0000; --mid:#b38600; --good:#1a8c00;
+  --text:#1a2a3a; --text2:#3a5a72; --muted:#8aa0b2;
+}
+body.light::before {
+  background-image:linear-gradient(rgba(0,119,204,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,119,204,0.04) 1px,transparent 1px);
+}
+body.light .topbar,
+body.light .sidebar,
+body.light .bnav {
+  box-shadow: 0 1px 8px rgba(0,0,0,0.08);
+}
+body.light .kpi,
+body.light .card,
+body.light .sys-card,
+body.light .rcard {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+body.light input[type=range].sl-b {
+  background:linear-gradient(90deg,#0077cc 0%,#0077cc var(--p,50%),var(--border2) var(--p,50%),var(--border2) 100%);
+}
+body.light input[type=range].sl-o {
+  background:linear-gradient(90deg,var(--a2) 0%,var(--a2) var(--p,60%),var(--border2) var(--p,60%),var(--border2) 100%);
+}
+body.light input[type=range].sl-y {
+  background:linear-gradient(90deg,var(--a4) 0%,var(--a4) var(--p,40%),var(--border2) var(--p,40%),var(--border2) 100%);
+}
+body.light .brand-name { color:var(--accent); }
+body.light .tb-clock { color:var(--accent); }
+
+/* ── THEME TOGGLE BTN ── */
+.theme-btn {
+  width:36px; height:36px; border:1px solid var(--border2); background:var(--panel);
+  display:flex; align-items:center; justify-content:center; font-size:1rem;
+  cursor:pointer; border-radius:2px; transition:all .2s; flex-shrink:0;
+}
+.theme-btn:active { opacity:.7; }
+
+/* ── THEME TOGGLE IN SETTINGS ── */
+.theme-toggle-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 0; border-bottom:1px solid rgba(255,255,255,.04);
+  gap:12px;
+}
+body.light .theme-toggle-row { border-bottom-color:rgba(0,0,0,.06); }
+
+.theme-pills {
+  display:flex; gap:6px;
+}
+.theme-pill {
+  font-family:'Share Tech Mono',monospace; font-size:.62rem; letter-spacing:1px;
+  padding:6px 12px; border:1px solid var(--border2); border-radius:2px;
+  cursor:pointer; transition:all .2s; color:var(--muted); background:var(--panel2);
+  display:flex; align-items:center; gap:5px;
+}
+.theme-pill.active {
+  border-color:var(--accent); color:var(--accent);
+  background:var(--aglow);
+}
+
+
+/* ── COOLING POND PAGE ── */
+.pond-header-accent { color:#00c9a7; }
+.pond-border { border-top:2px solid #00c9a7 !important; }
+.pond-ct { color:#00c9a7 !important; }
+.sl-pond { background:linear-gradient(90deg,#00c9a7 0%,#00c9a7 var(--p,50%),var(--border2) var(--p,50%),var(--border2) 100%); }
+.kc-pond::after { background:#00c9a7; }
+
+.pond-map {
+  width:100%; height:140px; background:var(--panel2);
+  border:1px solid var(--border); border-radius:2px;
+  position:relative; overflow:hidden; margin-top:10px;
+}
+.pond-map-water {
+  position:absolute; inset:14px 14px 30px 14px;
+  background:linear-gradient(135deg,rgba(0,180,215,.18),rgba(0,201,167,.1));
+  border:1.5px solid rgba(0,201,167,.35); border-radius:6px;
+}
+.pond-map-wave {
+  position:absolute; bottom:0; left:0; right:0; height:24px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 24'%3E%3Cpath d='M0,12 C45,4 90,20 135,12 C180,4 225,20 270,12 C315,4 345,18 360,12 L360,24 L0,24Z' fill='rgba(0,201,167,0.15)'/%3E%3C/svg%3E") repeat-x;
+  animation:wave 3s linear infinite;
+}
+@keyframes wave { from{background-position:0 0} to{background-position:360px 0} }
+.pond-map-label {
+  position:absolute; font-family:'Share Tech Mono',monospace; font-size:.5rem;
+  letter-spacing:1px; color:rgba(0,201,167,.7);
+}
+.pond-sensor-dot {
+  position:absolute; width:8px; height:8px; border-radius:50%;
+  background:#00c9a7; box-shadow:0 0 8px #00c9a7;
+  animation:pulse 2s ease-in-out infinite;
+}
+.pond-zone-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  font-family:'Share Tech Mono',monospace; font-size:.56rem;
+  padding:3px 8px; border-radius:2px; letter-spacing:.5px;
+  background:rgba(0,201,167,.1); color:#00c9a7; border:1px solid rgba(0,201,167,.25);
+}
+.pond-param-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px;
+}
+.pond-param {
+  background:var(--panel2); border:1px solid var(--border); padding:10px 12px; border-radius:2px;
+}
+.pond-param-lbl { font-family:'Share Tech Mono',monospace; font-size:.52rem; color:var(--muted); letter-spacing:.5px; }
+.pond-param-val { font-family:'Alata',sans-serif; font-size:1.1rem; font-weight:700; margin-top:3px; }
+.pond-param-unit { font-family:'Share Tech Mono',monospace; font-size:.5rem; color:var(--muted); }
+
+
+/* ── COOLING TOWER PAGE ── */
+.ct-accent { color:#00b4d8; }
+.ct-border  { border-top:2px solid #00b4d8 !important; }
+.ct-ct      { color:#00b4d8 !important; }
+.sl-ct { background:linear-gradient(90deg,#00b4d8 0%,#00b4d8 var(--p,50%),var(--border2) var(--p,50%),var(--border2) 100%); }
+.kc-ct::after { background:#00b4d8; }
+.ct-zone-badge {
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:'Share Tech Mono',monospace;font-size:.56rem;
+  padding:3px 8px;border-radius:2px;letter-spacing:.5px;
+  background:rgba(0,180,216,.1);color:#00b4d8;border:1px solid rgba(0,180,216,.25);
+}
+
+/* ── DASHBOARD ALL-SYSTEMS CARDS ── */
+.dash-systems-section { display:flex;flex-direction:column;gap:10px; }
+.dash-sys-card {
+  background:var(--panel);border:1px solid var(--border);padding:14px;
+  border-radius:2px;cursor:pointer;transition:border-color .2s;position:relative;
+}
+.dash-sys-card:active { opacity:.85; }
+.dash-sys-card.active-dash { border-color:var(--accent); }
+.dash-sys-card::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--card-accent,var(--accent)),transparent 70%);
+}
+.dash-sys-hd { display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px; }
+.dash-sys-name { font-family:'Alata',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:1px; }
+.dash-sys-meta { font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--muted);margin-top:2px;letter-spacing:.5px; }
+.dash-sys-actions { display:flex;gap:6px;align-items:flex-start;flex-shrink:0; }
+.dash-act-btn { 
+  font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.5px;
+  padding:4px 9px;border:1px solid var(--border2);background:var(--panel2);
+  color:var(--text2);cursor:pointer;border-radius:2px;white-space:nowrap;transition:all .2s;
+}
+.dash-act-btn:active { opacity:.7; }
+.dash-act-btn.view:hover  { border-color:var(--accent);color:var(--accent); }
+.dash-act-btn.edit:hover  { border-color:var(--a4);color:var(--a4); }
+.dash-act-btn.del:hover   { border-color:var(--bad);color:var(--bad); }
+.dash-sys-kpis { display:grid;grid-template-columns:repeat(3,1fr);gap:6px; }
+.dash-kpi { background:var(--panel2);padding:7px 10px;border-radius:2px; }
+.dash-kpi-lbl { font-family:'Share Tech Mono',monospace;font-size:.48rem;color:var(--muted);letter-spacing:.5px; }
+.dash-kpi-val { font-family:'Alata',sans-serif;font-size:1rem;font-weight:700;margin-top:2px;line-height:1; }
+.dash-kpi-unit { font-family:'Share Tech Mono',monospace;font-size:.45rem;color:var(--muted); }
+.dash-sys-footer { display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid var(--border); }
+.dash-sys-type-tag { font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--text2);letter-spacing:.5px; }
+
+/* ── SECTION LABEL ── */
+.dash-section-lbl {
+  font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;padding:6px 0 4px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.dash-add-btn {
+  font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.5px;
+  padding:4px 10px;border:1px solid var(--good);color:var(--good);
+  background:transparent;cursor:pointer;border-radius:2px;transition:all .2s;
+}
+.dash-add-btn:active { opacity:.7; }
+
+/* Empty state */
+.dash-empty {
+  text-align:center;padding:24px 16px;
+  background:var(--panel2);border:1px dashed var(--border2);border-radius:2px;
+}
+.dash-empty-icon { font-size:1.8rem;margin-bottom:8px; }
+.dash-empty-txt { font-family:'Alata',sans-serif;font-size:.85rem;color:var(--muted);letter-spacing:1px; }
+.dash-empty-sub { font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);margin-top:4px; }
+
+@media(min-width:768px) {
+  .dash-systems-section { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+}
+@media(min-width:1100px) {
+  .dash-systems-section { grid-template-columns:1fr 1fr 1fr; }
+}
+
+
+/* ── STOP SYSTEM MODAL ── */
+.stop-modal-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(6px);}
+.stop-modal-overlay.open{opacity:1;pointer-events:all;}
+.stop-modal{background:var(--surface);border:1px solid rgba(255,59,59,.4);width:calc(100% - 32px);max-width:420px;border-radius:4px;transform:scale(.94);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+.stop-modal-overlay.open .stop-modal{transform:scale(1);}
+.stop-modal-head{background:rgba(255,59,59,.12);border-bottom:1px solid rgba(255,59,59,.25);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;}
+.stop-modal-title{font-family:'Alata',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--bad);}
+.stop-modal-body{padding:16px 18px;}
+.stop-modal-foot{padding:12px 18px;display:flex;gap:8px;border-top:1px solid var(--border);}
+
+/* ── SYSTEM STOPPED BANNER ── */
+.stopped-banner{background:rgba(255,59,59,.1);border:1px solid rgba(255,59,59,.3);border-left:4px solid var(--bad);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;animation:fadeUp .25s ease;}
+.stopped-banner-txt{font-family:'Alata',sans-serif;font-size:.85rem;font-weight:700;color:var(--bad);letter-spacing:.5px;}
+.stopped-banner-sub{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--muted);margin-top:2px;}
+.stopped-badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:3px 8px;border:1px solid var(--bad);color:var(--bad);border-radius:2px;background:rgba(255,59,59,.08);letter-spacing:1px;animation:blink 1.4s step-end infinite;}
+
+/* ── COMPLIANCE / ALARM INLINE ── */
+.alarm-row{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:rgba(255,59,59,.06);border:1px solid rgba(255,59,59,.2);border-radius:2px;margin-bottom:6px;}
+.alarm-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.alarm-msg{font-family:'Exo 2',sans-serif;font-size:.8rem;flex:1;}
+.alarm-param{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);margin-top:2px;}
+.warn-row{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:rgba(255,204,0,.06);border:1px solid rgba(255,204,0,.2);border-radius:2px;margin-bottom:6px;}
+.warn-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+
+/* ── STOP BUTTON PER PAGE ── */
+.page-stop-btn{font-family:'Rajdhani',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:8px 13px;border:1px solid var(--bad);color:var(--bad);background:transparent;cursor:pointer;border-radius:2px;transition:all .2s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
+.page-stop-btn:active,.page-stop-btn:hover{background:rgba(255,59,59,.1);}
+.page-stop-btn.stopped{border-color:var(--good);color:var(--good);}
+.page-stop-btn.stopped:hover{background:rgba(57,255,20,.1);}
+
+/* ── ALARM COUNTS BADGE IN TOPBAR ── */
+#alarm-count-total{display:none;}
+
+/* ── LIVE VALUE SPANS ── */
+.live-val{transition:color .3s;}
+.live-alarm{color:var(--bad)!important;text-shadow:0 0 8px var(--bad);}
+.live-warn{color:var(--mid)!important;}
+.live-ok{color:var(--good)!important;}
+
+</style>
+</head>
+<body>
+
+<!-- ════ TOPBAR ════ -->
+<div class="topbar">
+  <div class="tb-left">
+    <div class="menu-btn" id="menuBtn" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
+    <div class="brand">
+      <div class="brand-hex">⬡</div>
+      <div>
+        <div class="brand-name" id="tb-sys-name">LTPCS</div>
+        <div class="brand-sub" id="tb-sys-id">LASALLE THERMAL POLLUTION CTRL</div>
+      </div>
+    </div>
+  </div>
+  <div class="tb-right">
+    <div class="tb-clock" id="clock">--:--:--</div>
+    <div class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Light/Dark">🌙</div>
+    <div class="tb-icon" onclick="goTo('alerts')">🔔<div class="notif-dot">3</div></div>
+    <div class="tb-icon" onclick="goTo('account')">👤</div>
+  </div>
+</div>
+
+<!-- ════ OVERLAY ════ -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<div class="sidebar" id="sidebar">
+  <div class="sid-head">
+    <div class="sid-user" onclick="closeSidebar();goTo('account')">
+      <div class="sid-av">JR</div>
+      <div>
+        <div class="sid-name">Jose Reyes</div>
+        <div class="sid-role">CHIEF ENGINEER</div>
+      </div>
+    </div>
+    <div class="sid-close" onclick="closeSidebar()">✕</div>
+  </div>
+  <div class="sid-body">
+    <div class="sid-sec">Monitor</div>
+    <div class="sid-item active" onclick="navTo('dashboard')"><span class="sid-icon">📊</span>Dashboard</div>
+    <div class="sid-item" onclick="navTo('input')"><span class="sid-icon">📥</span>Input Control</div>
+    <div class="sid-item" onclick="navTo('operating')"><span class="sid-icon">⚙️</span>Operating Vars</div>
+    <div class="sid-item" onclick="navTo('performance')"><span class="sid-icon">📈</span>Performance</div>
+    <div class="sid-item" onclick="navTo('output')"><span class="sid-icon">📤</span>Output Control</div>
+    <div class="sid-item" onclick="navTo('tower')"><span class="sid-icon">🌊</span>Cooling Tower</div>
+    <div class="sid-item" onclick="navTo('pond')"><span class="sid-icon">🏞️</span>Cooling Pond</div>
+    <div class="sid-div"></div>
+    <div class="sid-sec">Systems</div>
+    <div class="sid-item" onclick="navTo('systems')"><span class="sid-icon">🏭</span>Manage Stations<span class="sid-badge sb-grn" id="sid-sys-count">1</span></div>
+    <div class="sid-div"></div>
+    <div class="sid-sec">Data</div>
+    <div class="sid-item" onclick="navTo('reports')"><span class="sid-icon">📋</span>Data Reports</div>
+    <div class="sid-item" onclick="navTo('alerts')"><span class="sid-icon">🔔</span>Alerts & Logs<span class="sid-badge sb-red">3</span></div>
+    <div class="sid-item" onclick="navTo('compliance')"><span class="sid-icon">✅</span>Compliance<span class="sid-badge sb-grn">OK</span></div>
+    <div class="sid-div"></div>
+    <div class="sid-sec">Admin</div>
+    <div class="sid-item" onclick="navTo('settings')"><span class="sid-icon">🔧</span>Settings</div>
+    <div class="sid-item" onclick="navTo('account')"><span class="sid-icon">👤</span>Account</div>
+  </div>
+  <div class="sid-foot">
+    <div class="sys-ft-title" id="sid-foot-title">ACTIVE SYSTEM STATUS</div>
+    <div id="sid-foot-status"></div>
+  </div>
+</div>
+
+<!-- ════ MAIN ════ -->
+<div class="main">
+
+<!-- ── DASHBOARD ── -->
+<div id="page-dashboard" class="page active">
+  <div class="ph">
+    <div>
+      <div class="ph-title" style="color:var(--accent)" id="dash-title">Overview Dashboard</div>
+      <div class="ph-sub" id="dash-sub">ALL OPERATIONAL SYSTEMS · LIVE</div>
+    </div>
+    <div class="ph-act">
+      <button class="btn b-s" style="font-size:.7rem;padding:7px 12px" onclick="openAddModal()">＋ Add System</button>
+      <button class="btn b-w" style="font-size:.7rem;padding:7px 10px" onclick="restartAllSystems()">↻ Restart All</button>
+      <button class="btn b-d" style="font-size:.7rem;padding:7px 10px" onclick="openStopModal(null)">⛔ STOP SYSTEM</button>
+    </div>
+  </div>
+
+  <div class="ticker">
+    <div class="tdot"></div>
+    <span class="ttext">⚠ Effluent temp near limit at B3 &nbsp;|&nbsp; Heat load +8% — check V-12 &nbsp;|&nbsp; CT-2 nominal &nbsp;|&nbsp; CP-1 All Clear &nbsp;|&nbsp; EPA Compliance: PASS</span>
+  </div>
+
+  <!-- Fleet KPIs -->
+  <div class="kpi-scroll" id="dash-fleet-kpis"></div>
+
+  <!-- All Systems Cards -->
+  <div id="dash-all-systems"></div>
+</div>
+
+<!-- ── SYSTEMS MANAGEMENT ── -->
+<div id="page-systems" class="page">
+  <div class="ph">
+    <div>
+      <div class="ph-title" style="color:var(--accent)">Manage Systems</div>
+      <div class="ph-sub" id="sys-count-label">— MONITORING STATIONS</div>
+    </div>
+    <div class="ph-act">
+      <button class="btn b-w" style="font-size:.7rem;padding:7px 10px" onclick="restartAllSystems()">↻ Restart All</button>
+      <button class="btn b-d" style="font-size:.7rem;padding:7px 10px" onclick="removeOfflineSystems()" title="Remove all offline/maintenance stations">🗑 Remove Offline</button>
+      <button class="btn b-s" onclick="openAddModal()">+ Add System</button>
+    </div>
+  </div>
+
+  <div class="card" style="padding:10px 14px">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:1px;margin-bottom:8px">QUICK SWITCH — TAP TO MONITOR</div>
+    <div class="sys-switcher" id="mgr-switcher"></div>
+  </div>
+
+  <div class="sys-grid" id="sys-grid"></div>
+
+  <div style="background:var(--panel2);border:1px dashed var(--border2);padding:20px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;border-radius:2px" onclick="openAddModal()">
+    <div style="font-size:2rem;color:var(--muted)">＋</div>
+    <div style="font-family:'Alata',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:2px;color:var(--muted)">ADD NEW SYSTEM</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);text-align:center">Connect a new monitoring station, cooling tower, or heat exchange unit</div>
+  </div>
+</div>
+
+<!-- ── INPUT ── -->
+<div id="page-input" class="page">
+  <div class="ph">
+    <div><div class="ph-title" style="color:#00b4d8">A · Input Control</div><div class="ph-sub" id="inp-sys-label">INFLUENT VARIABLES</div></div>
+    <div class="ph-act">
+      <button class="btn b-d" style="font-size:.65rem;padding:6px 10px" onclick="deleteActiveSystem()">🗑 Remove</button>
+      <div id="inp-stop-btn"></div>
+      <button class="btn b-s" onclick="saveActiveSystem()">💾 Save</button>
+    </div>
+  </div>
+  <!-- system switcher strip on input page -->
+  <div id="input-sys-switcher-wrap">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:1.5px;margin-bottom:6px">SELECT SYSTEM TO CONFIGURE</div>
+    <div class="sys-switcher" id="input-switcher"></div>
+  </div>
+  <div id="input-content"></div>
+</div>
+
+<!-- ── OPERATING ── -->
+<div id="page-operating" class="page">
+  <div class="ph">
+    <div><div class="ph-title" style="color:var(--a2)">B · Operating Vars</div><div class="ph-sub" id="op-sys-label">PROCESS CHARACTERISTICS</div></div>
+    <div class="ph-act">
+      <button class="btn b-d" style="font-size:.65rem;padding:6px 10px" onclick="deleteActiveSystem()">🗑 Remove</button>
+      <button class="btn b-s" onclick="saveActiveSystem()">💾 Save</button>
+    </div>
+  </div>
+  <div class="sys-switcher" id="operating-switcher" style="margin-bottom:10px"></div>
+  <div id="operating-content"></div>
+</div>
+
+<!-- ── PERFORMANCE ── -->
+<div id="page-performance" class="page">
+  <div class="ph">
+    <div><div class="ph-title" style="color:var(--a3)">C · Performance</div><div class="ph-sub" id="perf-sys-label">EFFICIENCY & EMISSIONS</div></div>
+    <div class="ph-act">
+      <button class="btn b-d" style="font-size:.65rem;padding:6px 10px" onclick="deleteActiveSystem()">🗑 Remove</button>
+      <button class="btn b-p" onclick="goTo('reports')">📋 Export</button>
+    </div>
+  </div>
+  <div class="sys-switcher" id="performance-switcher" style="margin-bottom:10px"></div>
+  <div id="performance-content"></div>
+</div>
+
+<!-- ── OUTPUT ── -->
+<div id="page-output" class="page">
+  <div class="ph">
+    <div><div class="ph-title" style="color:var(--a4)">D · Output Control</div><div class="ph-sub" id="out-sys-label">EFFLUENT MANAGEMENT</div></div>
+    <div class="ph-act">
+      <button class="btn b-d" style="font-size:.65rem;padding:6px 10px" onclick="deleteActiveSystem()">🗑 Remove</button>
+      <button class="btn b-s" onclick="saveActiveSystem()">💾 Save</button>
+    </div>
+  </div>
+  <div class="sys-switcher" id="output-switcher" style="margin-bottom:10px"></div>
+  <div id="output-content"></div>
+</div>
+
+<!-- ── REPORTS ── -->
+<div id="page-reports" class="page">
+  <div class="ph"><div><div class="ph-title">Data Reports</div><div class="ph-sub">ANALYTICS & EXPORT</div></div></div>
+  <div class="rcard"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div><div style="font-family:'Alata',sans-serif;font-weight:700;font-size:.95rem">Daily Thermal Report</div><div class="ph-sub">Feb 28 · 14 parameters</div></div><span class="chip c-ok"><span class="cdot"></span>READY</span></div><button class="btn b-p" style="width:100%;justify-content:center" onclick="toast('Report downloading...')">↓ Download</button></div>
+  <div class="rcard"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div><div style="font-family:'Alata',sans-serif;font-weight:700;font-size:.95rem">Weekly Summary</div><div class="ph-sub">Feb 22–28 · Avg Eff: 95.8%</div></div><span class="chip c-ok"><span class="cdot"></span>READY</span></div><button class="btn b-p" style="width:100%;justify-content:center" onclick="toast('Report downloading...')">↓ Download</button></div>
+  <div class="rcard"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div><div style="font-family:'Alata',sans-serif;font-weight:700;font-size:.95rem">Monthly EPA Report</div><div class="ph-sub">February 2026 · Due Mar 5</div></div><span class="chip c-info"><span class="cdot"></span>DUE MAR 5</span></div><button class="btn b-s" style="width:100%;justify-content:center" onclick="toast('Submitted to EPA.')">✓ Submit to EPA</button></div>
+  <div class="card"><div class="ct" style="color:var(--accent)">7-Day Historical Data</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>DATE</th><th>INLET</th><th>OUT</th><th>EFF%</th><th>ΔT</th><th>STATUS</th></tr></thead>
+      <tbody>
+        <tr><td class="td-m">Feb 28</td><td class="td-n" style="color:#00b4d8">84.3°</td><td class="td-n" style="color:var(--a4)">31.1°</td><td class="td-n" style="color:var(--good)">96.2</td><td class="td-n" style="color:var(--mid)">+2.8</td><td><span class="chip c-ok"><span class="cdot"></span>PASS</span></td></tr>
+        <tr><td class="td-m">Feb 27</td><td class="td-n" style="color:#00b4d8">82.1°</td><td class="td-n" style="color:var(--a4)">30.8°</td><td class="td-n" style="color:var(--good)">95.8</td><td class="td-n" style="color:var(--good)">+2.4</td><td><span class="chip c-ok"><span class="cdot"></span>PASS</span></td></tr>
+        <tr><td class="td-m">Feb 26</td><td class="td-n" style="color:#00b4d8">85.7°</td><td class="td-n" style="color:var(--a4)">31.4°</td><td class="td-n" style="color:var(--good)">96.0</td><td class="td-n" style="color:var(--mid)">+2.9</td><td><span class="chip c-warn"><span class="cdot"></span>WARN</span></td></tr>
+        <tr><td class="td-m">Feb 24</td><td class="td-n" style="color:#00b4d8">88.4°</td><td class="td-n" style="color:var(--a4)">32.1°</td><td class="td-n" style="color:var(--mid)">93.2</td><td class="td-n" style="color:var(--bad)">+3.2</td><td><span class="chip c-bad"><span class="cdot"></span>EXCEED</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ── ALERTS ── -->
+<div id="page-alerts" class="page">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Alerts &amp; Logs</div>
+      <div class="ph-sub">LTPCS / MONITORING / SELECT &amp; RESOLVE</div>
+    </div>
+    <div class="ph-act">
+      <button class="btn b-w" style="font-size:.7rem;padding:7px 10px" onclick="requestAuth('selectAll','alerts')">☑ Select All</button>
+      <button class="btn b-d" style="font-size:.7rem;padding:7px 10px" id="btn-clear-sel" onclick="requestAuth('clearSelected','alerts')" disabled>🗑 Clear <span id="sel-count-badge" class="clear-count-badge" style="display:none">0</span></button>
+    </div>
+  </div>
+
+  <!-- Log Tabs -->
+  <div class="card" style="padding:0 14px 14px">
+    <div class="log-tabs">
+      <div class="log-tab active" id="ltab-active" onclick="switchLogTab('active')">Active Alerts <span id="active-count-lbl" style="color:var(--bad)">(3)</span></div>
+      <div class="log-tab" id="ltab-event" onclick="switchLogTab('event')">Event Log <span id="event-count-lbl" style="color:var(--muted)">(6)</span></div>
+      <div class="log-tab" id="ltab-resolved" onclick="switchLogTab('resolved')">Resolved <span id="resolved-count-lbl" style="color:var(--good)">(0)</span></div>
+    </div>
+
+    <!-- ACTIVE ALERTS -->
+    <div id="ltab-content-active" class="log-tab-content active">
+      <div class="alert-select-bar">
+        <div class="select-all-wrap" onclick="requestAuth('selectAllTab','active')">
+          <div class="cb" id="cb-all-active"></div>
+          <span class="cb-label">SELECT ALL ALERTS</span>
+        </div>
+        <div class="sel-actions">
+          <button class="btn b-s" style="font-size:.6rem;padding:5px 10px" onclick="requestAuth('markResolved','active')">✓ Mark Resolved</button>
+          <button class="btn b-d" style="font-size:.6rem;padding:5px 10px" onclick="requestAuth('clearSelected','active')">🗑 Clear</button>
+        </div>
+      </div>
+      <div id="active-alerts-list"></div>
+    </div>
+
+    <!-- EVENT LOG -->
+    <div id="ltab-content-event" class="log-tab-content">
+      <div class="alert-select-bar">
+        <div class="select-all-wrap" onclick="requestAuth('selectAllTab','event')">
+          <div class="cb" id="cb-all-event"></div>
+          <span class="cb-label">SELECT ALL EVENTS</span>
+        </div>
+        <div class="sel-actions">
+          <button class="btn b-d" style="font-size:.6rem;padding:5px 10px" onclick="requestAuth('clearSelected','event')">🗑 Clear Selected</button>
+        </div>
+      </div>
+      <div id="event-log-list"></div>
+    </div>
+
+    <!-- RESOLVED -->
+    <div id="ltab-content-resolved" class="log-tab-content">
+      <div class="alert-select-bar">
+        <div class="select-all-wrap" onclick="requestAuth('selectAllTab','resolved')">
+          <div class="cb" id="cb-all-resolved"></div>
+          <span class="cb-label">SELECT ALL RESOLVED</span>
+        </div>
+        <div class="sel-actions">
+          <button class="btn b-d" style="font-size:.6rem;padding:5px 10px" onclick="requestAuth('clearSelected','resolved')">🗑 Clear Selected</button>
+        </div>
+      </div>
+      <div id="resolved-list"></div>
+      <div id="resolved-empty" style="text-align:center;padding:24px 0;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:1px;display:none">
+        <div style="font-size:1.8rem;margin-bottom:8px">✅</div>
+        NO RESOLVED ITEMS YET<br>
+        <span style="font-size:.55rem">Mark active alerts as resolved to see them here</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── COMPLIANCE ── -->
+<div id="page-compliance" class="page">
+  <div class="ph"><div><div class="ph-title">Compliance</div><div class="ph-sub">REGULATORY THRESHOLDS</div></div><div class="ph-act"><button class="btn b-s" onclick="toast('Thresholds saved.')">💾 Save</button></div></div>
+  <div class="card">
+    <div class="ct" style="color:var(--accent)">Alarm Thresholds</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:10px;"><div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text2);flex:1">MAX EFFLUENT TEMP</div><input class="t-num" type="number" value="86"><span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted)">°C</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:10px;"><div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text2);flex:1">MAX ΔT DISCHARGE</div><input class="t-num" type="number" value="3.0" step=".1"><span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted)">°C</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:10px;"><div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text2);flex:1">MIN DO RECEIVING WATER</div><input class="t-num" type="number" value="5.0" step=".1"><span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted)">mg/L</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;gap:10px;"><div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--text2);flex:1">MIN COLLECTION EFF.</div><input class="t-num" type="number" value="92"><span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted)">%</span></div>
+  </div>
+</div>
+
+<!-- ── SETTINGS ── -->
+<div id="page-settings" class="page">
+  <div class="ph"><div><div class="ph-title">Settings</div><div class="ph-sub">SYSTEM CONFIGURATION</div></div><div class="ph-act"><button class="btn b-s" onclick="toast('Settings saved.')">💾 Save</button></div></div>
+  <!-- Appearance Card -->
+  <div class="card">
+    <div class="ct" style="color:var(--accent)">Appearance</div>
+    <div class="theme-toggle-row">
+      <div>
+        <div class="s-title">Interface Theme</div>
+        <div class="s-sub">Choose between dark (default) and light mode</div>
+      </div>
+      <div class="theme-pills">
+        <div class="theme-pill active" id="pill-dark" onclick="setTheme('dark')">🌙 Dark</div>
+        <div class="theme-pill" id="pill-light" onclick="setTheme('light')">☀️ Light</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct" style="color:var(--accent)">General</div>
+    <div class="s-row"><div class="s-title">Station Name</div><input class="t-input" type="text" value="Station 04-Alpha" style="margin-top:6px"></div>
+    <div class="s-row"><div class="s-rt"><div><div class="s-title">Auto-Report Generation</div><div class="s-sub">Daily midnight auto-reports</div></div><div class="toggle on" onclick="tog(this)"></div></div></div>
+    <div class="s-row"><div class="s-rt"><div><div class="s-title">Email Alerts</div></div><div class="toggle on" onclick="tog(this)"></div></div></div>
+    <div class="s-row"><div class="s-title">Alert Recipients</div><input class="t-input" type="text" value="jreyes@plant.io, msantos@plant.io" style="margin-top:6px"></div>
+    <div class="s-row"><div class="s-rt"><div><div class="s-title">Two-Factor Auth</div></div><div class="toggle on" onclick="tog(this)"></div></div></div>
+    <div class="s-row"><div class="s-rt"><div><div class="s-title">SCADA Integration</div></div><div class="toggle on" onclick="tog(this)"></div></div></div>
+  </div>
+</div>
+
+<!-- ── ACCOUNT ── -->
+<div id="page-account" class="page">
+  <div class="ph"><div><div class="ph-title">Account</div><div class="ph-sub">USER PROFILE</div></div><div class="ph-act"><button class="btn b-s" onclick="toast('Profile saved.')">💾 Save</button></div></div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+      <div class="prof-av">JR</div>
+      <div><div style="font-family:'Alata',sans-serif;font-size:1.1rem;font-weight:700">Jose Reyes</div><div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--accent);letter-spacing:1px">CHIEF ENGINEER</div><div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--muted);margin-top:2px">ENG-0042 · Since Jan 2020</div></div>
+    </div>
+    <div class="s-row"><div class="s-title">Full Name</div><input class="t-input" type="text" value="Jose Reyes" style="margin-top:6px"></div>
+    <div class="s-row"><div class="s-title">Email</div><input class="t-input" type="email" value="jreyes@plant.io" style="margin-top:6px"></div>
+    <div class="s-row"><div class="s-title">Contact Number</div><input class="t-input" type="tel" value="+63 917 555 0142" style="margin-top:6px"></div>
+  </div>
+  <div class="card">
+    <div class="ct" style="color:var(--accent)">Access & Security</div>
+    <div class="srow"><div class="slbl">ROLE</div><div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--accent)">CHIEF ENGINEER</div></div>
+    <div class="srow"><div class="slbl">INPUT/OUTPUT CONTROL</div><span class="chip c-ok"><span class="cdot"></span>FULL ACCESS</span></div>
+    <div class="srow"><div class="slbl">TWO-FACTOR AUTH</div><span class="chip c-ok"><span class="cdot"></span>ENABLED</span></div>
+    <div class="srow"><div class="slbl">CERTIFICATION</div><div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--accent)">DENR #4182</div></div>
+    <button class="btn b-p" style="width:100%;justify-content:center;margin-top:8px" onclick="toast('Password reset email sent.')">🔑 Change Password</button>
+    <button class="btn b-d" style="width:100%;justify-content:center;margin-top:6px" onclick="toast('Signed out of all devices.')">⎋ Sign Out All Devices</button>
+  </div>
+
+  <!-- Watermark Credits -->
+  <div style="margin-top:8px;padding:20px 0 8px;text-align:center;border-top:1px solid var(--border)">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:2px;color:var(--muted);margin-bottom:10px;text-transform:uppercase">Project Team</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+      <div style="font-family:'Alata',sans-serif;font-size:.8rem;color:var(--text2);letter-spacing:.5px">Arne Kyle Tingson</div>
+      <div style="font-family:'Alata',sans-serif;font-size:.8rem;color:var(--text2);letter-spacing:.5px">Ella Joy Llema</div>
+      <div style="font-family:'Alata',sans-serif;font-size:.8rem;color:var(--text2);letter-spacing:.5px">Gaius Nathaniel Corral</div>
+      <div style="font-family:'Alata',sans-serif;font-size:.8rem;color:var(--text2);letter-spacing:.5px">Lance Andrew Ledesma</div>
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--muted);margin-top:10px;letter-spacing:1px">LTPCS · LaSalle Thermal Pollution Control System · 2026</div>
+  </div>
+</div>
+
+
+<!-- ── COOLING TOWER MONITORING ── -->
+<div id="page-tower" class="page">
+  <div class="ph">
+    <div>
+      <div class="ph-title ct-accent">Cooling Tower</div>
+      <div class="ph-sub" id="ct-page-sub">CT-2 · NORTH BLOCK · LIVE MONITORING</div>
+    </div>
+    <div class="ph-act">
+      <button class="btn" style="border-color:#00b4d8;color:#00b4d8;font-size:.7rem;padding:7px 10px" onclick="toast('Tower data exported.')">📋 Export</button>
+      <button class="page-stop-btn" id="tower-stop-btn" onclick="openStopModal(null)">⛔ Stop</button>
+      <button class="btn b-s" onclick="saveActiveSystem()">💾 Save</button>
+    </div>
+  </div>
+
+  <!-- Tower system selector (if multiple CT systems) -->
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:1.5px;margin-bottom:6px">SELECT COOLING TOWER</div>
+  <div class="sys-switcher" id="tower-switcher"></div>
+
+  <!-- Status Banner -->
+  <div style="background:rgba(0,180,216,.08);border:1px solid rgba(0,180,216,.25);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:8px;height:8px;border-radius:50%;background:#00b4d8;box-shadow:0 0 8px #00b4d8;animation:pulse 2s ease-in-out infinite;flex-shrink:0"></div>
+      <div>
+        <div id="ct-banner-name" style="font-family:'Alata',sans-serif;font-size:.95rem;font-weight:700;color:#00b4d8">DLSU Cooling Tower CT-2</div>
+        <div id="ct-banner-sub" style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--text2);margin-top:1px">LTPCS-002 · Cooling Tower · Zone 2 — North Block</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="chip c-ok"><span class="cdot"></span>ONLINE</span>
+      <span class="ct-zone-badge">🌊 TOWER</span>
+    </div>
+  </div>
+
+  <div id="tower-alert-panel"></div>
+
+  <!-- KPI Row -->
+  <div class="kpi-scroll">
+    <div class="kpi kc-ct" style="border-bottom:2px solid #00b4d8"><div class="kpi-lbl">INLET TEMP</div><div class="kpi-val" style="color:#00b4d8"><span id="ct-kpi-it">76.8</span> <span class="kpi-unit">°C</span></div><div class="kpi-ch up" id="ct-kpi-it-trend">▲ Live</div></div>
+    <div class="kpi kc-ct" style="border-bottom:2px solid #00d4ff"><div class="kpi-lbl">INFLOW RATE</div><div class="kpi-val" style="color:#00d4ff"><span id="ct-kpi-flow">5,120</span> <span class="kpi-unit">L/min</span></div><div class="kpi-ch st">— Live</div></div>
+    <div class="kpi kc-ct" style="border-bottom:2px solid var(--a3)"><div class="kpi-lbl">EFFICIENCY</div><div class="kpi-val" style="color:var(--a3)"><span id="ct-kpi-eff">91.0</span> <span class="kpi-unit">%</span></div><div class="kpi-ch st">— Stable</div></div>
+    <div class="kpi kc-ct" style="border-bottom:2px solid var(--a4)"><div class="kpi-lbl">OUTLET TEMP</div><div class="kpi-val" style="color:var(--a4)"><span id="ct-kpi-out">28.4</span> <span class="kpi-unit">°C</span></div><div class="kpi-ch dn" id="ct-kpi-out-status">▼ Compliant</div></div>
+    <div class="kpi kc-ct" style="border-bottom:2px solid var(--a2)"><div class="kpi-lbl">ΔT ACHIEVED</div><div class="kpi-val" style="color:var(--a2)"><span id="ct-kpi-dt">45.7</span> <span class="kpi-unit">°C</span></div><div class="kpi-ch up" id="ct-kpi-dt-status">▲ High</div></div>
+    <div class="kpi kc-ct" style="border-bottom:2px solid var(--a5)"><div class="kpi-lbl">ENERGY USE</div><div class="kpi-val" style="color:var(--a5)"><span id="ct-kpi-energy">312</span> <span class="kpi-unit">kWh</span></div><div class="kpi-ch dn">▼ Est.</div></div>
+  </div>
+
+  <!-- Tower Schematic -->
+  <div class="card">
+    <div class="ct ct-ct">Tower Layout — CT-2
+      <span class="ct-zone-badge">5,120 L/min · 3.1 MW</span>
+    </div>
+    <svg width="100%" height="160" viewBox="0 0 360 160" preserveAspectRatio="xMidYMid meet" style="display:block">
+      <defs>
+        <linearGradient id="ctg1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#00b4d8" stop-opacity=".3"/>
+          <stop offset="100%" stop-color="#00b4d8" stop-opacity=".05"/>
+        </linearGradient>
+      </defs>
+      <!-- Tower body -->
+      <rect x="100" y="20" width="160" height="110" rx="4" fill="url(#ctg1)" stroke="rgba(0,180,216,.3)" stroke-width="1.5"/>
+      <!-- Fill media section -->
+      <rect x="110" y="50" width="140" height="50" rx="2" fill="rgba(0,180,216,.08)" stroke="rgba(0,180,216,.15)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="180" y="80" fill="rgba(0,180,216,.5)" font-family="Share Tech Mono" font-size="8" text-anchor="middle">FILL MEDIA</text>
+      <!-- Water basin -->
+      <rect x="110" y="105" width="140" height="18" rx="2" fill="rgba(0,100,180,.2)" stroke="rgba(0,180,216,.2)" stroke-width="1"/>
+      <text x="180" y="117" fill="rgba(0,150,200,.7)" font-family="Share Tech Mono" font-size="7" text-anchor="middle">COLD WATER BASIN</text>
+      <!-- Fan at top -->
+      <circle cx="180" cy="30" r="16" fill="none" stroke="rgba(0,180,216,.4)" stroke-width="1.5"/>
+      <line x1="180" y1="14" x2="180" y2="46" stroke="rgba(0,180,216,.4)" stroke-width="1.5"/>
+      <line x1="164" y1="30" x2="196" y2="30" stroke="rgba(0,180,216,.4)" stroke-width="1.5"/>
+      <text x="180" y="34" fill="rgba(0,180,216,.6)" font-family="Share Tech Mono" font-size="6" text-anchor="middle">FAN</text>
+      <!-- Inlet pipe left -->
+      <rect x="60" y="58" width="40" height="10" rx="2" fill="rgba(255,107,53,.2)" stroke="rgba(255,107,53,.4)" stroke-width="1.5"/>
+      <text x="80" y="65" fill="rgba(255,107,53,.8)" font-family="Share Tech Mono" font-size="6" text-anchor="middle">INLET</text>
+      <text x="80" y="74" fill="rgba(255,107,53,.6)" font-family="Share Tech Mono" font-size="5.5" text-anchor="middle">76.8°C</text>
+      <!-- Outlet pipe right -->
+      <rect x="260" y="108" width="40" height="10" rx="2" fill="rgba(57,255,20,.15)" stroke="rgba(57,255,20,.35)" stroke-width="1.5"/>
+      <text x="280" y="115" fill="rgba(57,255,20,.8)" font-family="Share Tech Mono" font-size="6" text-anchor="middle">OUTLET</text>
+      <text x="280" y="124" fill="rgba(57,255,20,.6)" font-family="Share Tech Mono" font-size="5.5" text-anchor="middle">~28.4°C</text>
+      <!-- Air flow arrows -->
+      <text x="44" y="95" fill="rgba(0,180,216,.4)" font-family="Share Tech Mono" font-size="7">AIR →</text>
+      <text x="310" y="95" fill="rgba(0,180,216,.4)" font-family="Share Tech Mono" font-size="7">← AIR</text>
+      <!-- Labels -->
+      <text x="180" y="150" fill="rgba(80,120,160,.5)" font-family="Share Tech Mono" font-size="7" text-anchor="middle">DLSU COOLING TOWER CT-2 · LTPCS-002</text>
+      <!-- Sensor dots -->
+      <circle cx="130" cy="65" r="4" fill="#00b4d8" opacity=".8"><animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="230" cy="65" r="4" fill="#00b4d8" opacity=".8"><animate attributeName="opacity" values="0.8;0.3;0.8" dur="2.5s" repeatCount="indefinite"/></circle>
+      <circle cx="180" cy="100" r="4" fill="#00b4d8" opacity=".8"><animate attributeName="opacity" values="0.8;0.3;0.8" dur="1.8s" repeatCount="indefinite"/></circle>
+    </svg>
+  </div>
+
+  <!-- A · Influent Inputs -->
+  <div class="card ct-border">
+    <div class="ct ct-ct">A · Influent Inputs</div>
+    <div class="ctrl"><div class="cl">PRIMARY PHASE</div><select class="ctrl-select" style="margin-top:4px"><option selected>LIQUID — Industrial Wastewater</option><option>GAS — Thermal Off-Gas</option><option>SOLID — Slurry</option></select></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">INLET TEMPERATURE</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-it">76.8</span><span class="cu">°C</span></div></div><input type="range" class="sl-ct" min="20" max="120" step=".5" value="76.8" style="--p:57%" oninput="sv('ct-it',this,20,120,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">VOLUMETRIC FLOW RATE</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-fl">5120</span><span class="cu">L/min</span></div></div><input type="range" class="sl-ct" min="500" max="10000" step="10" value="5120" style="--p:49%" oninput="sv('ct-fl',this,500,10000,0)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">MASS HEAT LOAD</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-hl">3.1</span><span class="cu">MW</span></div></div><input type="range" class="sl-ct" min=".1" max="10" step=".1" value="3.1" style="--p:30%" oninput="sv('ct-hl',this,.1,10,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">PARTICLE / DROPLET SIZE</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-ps">2.5</span><span class="cu">µm</span></div></div><input type="range" class="sl-ct" min=".1" max="10" step=".1" value="2.5" style="--p:24%" oninput="sv('ct-ps',this,.1,10,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">INFLUENT pH</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-ph">7.2</span><span class="cu">pH</span></div></div><input type="range" class="sl-ct" min="2" max="12" step=".1" value="7.2" style="--p:52%" oninput="sv('ct-ph',this,2,12,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">TOTAL SUSPENDED SOLIDS</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-ts">148</span><span class="cu">mg/L</span></div></div><input type="range" class="sl-ct" min="0" max="500" step="1" value="148" style="--p:30%" oninput="sv('ct-ts',this,0,500,0)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">DISSOLVED OXYGEN</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-do">4.1</span><span class="cu">mg/L</span></div></div><input type="range" class="sl-ct" min="0" max="14" step=".1" value="4.1" style="--p:29%" oninput="sv('ct-do',this,0,14,1)"></div>
+    <div class="trow"><div><div class="t-sub">Pre-Screening Mesh Filter</div><div class="t-lbl">Removes particles &gt;2.5 µm</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+    <div class="trow"><div><div class="t-sub">Chemical Dosing (Auto PID)</div><div class="t-lbl">Corrosion &amp; scale inhibitor</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+  </div>
+
+  <!-- B · Operating Variables -->
+  <div class="card ct-border">
+    <div class="ct ct-ct">B · Operating Variables</div>
+    <div class="srow"><div class="slbl">THERMAL DIFFERENTIAL ΔT</div><div><div class="sval" style="color:var(--a2)">+45.7°C</div><span class="chip c-warn"><span class="cdot"></span>ELEVATED</span></div></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">AMBIENT WATER TEMP</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-at">31.1</span><span class="cu">°C</span></div></div><input type="range" class="sl-ct" min="15" max="45" step=".1" value="31.1" style="--p:54%" oninput="sv('ct-at',this,15,45,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">COOLANT FLOW RATE</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-cf">5120</span><span class="cu">L/min</span></div></div><input type="range" class="sl-ct" min="500" max="10000" step="10" value="5120" style="--p:49%" oninput="sv('ct-cf',this,500,10000,0)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">BYPASS VALVE V-12</div><div class="cv-wrap"><span class="cv" style="color:var(--bad)" id="ct-bv">62</span><span class="cu">% open</span></div></div><input type="range" class="sl-ct" min="0" max="100" step="1" value="62" style="--p:62%" oninput="sv('ct-bv',this,0,100,0)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">PRESSURE DROP</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-pd">1.8</span><span class="cu">bar</span></div></div><input type="range" class="sl-ct" min=".1" max="5" step=".1" value="1.8" style="--p:35%" oninput="sv('ct-pd',this,.1,5,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">RELATIVE HUMIDITY</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-rh">74</span><span class="cu">%</span></div></div><input type="range" class="sl-ct" min="10" max="100" step="1" value="74" style="--p:71%" oninput="sv('ct-rh',this,10,100,0)"></div>
+    <div class="ctrl"><div class="cl">COOLING MODE</div><select class="ctrl-select" style="margin-top:4px"><option selected>Evaporative — CT-2</option><option>Mechanical Chiller</option><option>Air-Cooled HX</option></select></div>
+    <div class="trow"><div><div class="t-sub">CT-2 Auto-Blowdown</div><div class="t-lbl">Purges concentrated dissolved solids</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+    <div class="trow"><div><div class="t-sub">Heat Recovery Mode</div><div class="t-lbl">Waste heat reuse pipeline active</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+    <div class="trow"><div><div class="t-sub">Emergency Vent</div><div class="t-lbl">Pressure threshold override</div></div><div class="toggle" onclick="tog(this)"></div></div>
+  </div>
+
+  <!-- C · Performance -->
+  <div class="card ct-border">
+    <div class="ct ct-ct">C · Thermal Performance</div>
+    <div class="kpi-scroll">
+      <div class="kpi" style="border-bottom:2px solid var(--a3);flex-shrink:0;width:140px"><div class="kpi-lbl">COLLECTION EFF.</div><div class="kpi-val" style="color:var(--a3);font-size:1.3rem">91.0<span class="kpi-unit">%</span></div><div class="kpi-ch up">⚠ Below 92%</div></div>
+      <div class="kpi" style="border-bottom:2px solid var(--a3);flex-shrink:0;width:140px"><div class="kpi-lbl">HX EFFECTIVENESS</div><div class="kpi-val" style="color:var(--a3);font-size:1.3rem">88.4<span class="kpi-unit">%</span></div><div class="kpi-ch up">⚠ &lt; 90% target</div></div>
+      <div class="kpi" style="border-bottom:2px solid var(--a5);flex-shrink:0;width:140px"><div class="kpi-lbl">ENERGY USE</div><div class="kpi-val" style="color:var(--a5);font-size:1.3rem">312<span class="kpi-unit">kWh</span></div><div class="kpi-ch dn">▼ -5%</div></div>
+      <div class="kpi" style="border-bottom:2px solid var(--a3);flex-shrink:0;width:140px"><div class="kpi-lbl">THERMAL EMISSION</div><div class="kpi-val" style="color:var(--a3);font-size:1.3rem">0.16<span class="kpi-unit">MW</span></div><div class="kpi-ch dn">Within limit</div></div>
+    </div>
+    <div style="margin-top:14px">
+      <div class="ctrl"><div class="ctrl-top"><div class="cl">COLLECTION EFFICIENCY</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8">91.0</span><span class="cu">%</span></div></div><div class="bar-bg"><div class="bar" style="width:91%;background:#00b4d8"></div></div></div>
+      <div class="ctrl"><div class="ctrl-top"><div class="cl">TSS REMOVAL</div><div class="cv-wrap"><span class="cv" style="color:var(--a3)">87</span><span class="cu">%</span></div></div><div class="bar-bg"><div class="bar" style="width:87%;background:var(--a3)"></div></div></div>
+      <div class="ctrl"><div class="ctrl-top"><div class="cl">HX EFFECTIVENESS</div><div class="cv-wrap"><span class="cv" style="color:var(--a4)">88.4</span><span class="cu">%</span></div></div><div class="bar-bg"><div class="bar" style="width:88.4%;background:var(--a4)"></div></div></div>
+    </div>
+    <!-- Compliance table -->
+    <div style="margin-top:14px;font-family:'Alata',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:1.5px;color:#00b4d8;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--border)">Regulatory Compliance</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>REGULATION</th><th>LIMIT</th><th>CURRENT</th><th>STATUS</th></tr></thead>
+      <tbody>
+        <tr><td>EPA §316(a) ΔT</td><td class="td-m">≤+3.0°C</td><td class="td-n" style="color:var(--mid)">+2.4°C</td><td><span class="chip c-warn"><span class="cdot"></span>NEAR MAX</span></td></tr>
+        <tr><td>NPDES Outlet Temp</td><td class="td-m">≤36°C</td><td class="td-n" style="color:var(--good)">~28.4°C</td><td><span class="chip c-ok"><span class="cdot"></span>PASS</span></td></tr>
+        <tr><td>Clean Water Act TSS</td><td class="td-m">≥85%</td><td class="td-n" style="color:var(--good)">87%</td><td><span class="chip c-ok"><span class="cdot"></span>PASS</span></td></tr>
+        <tr><td>State DO Standard</td><td class="td-m">≥5 mg/L</td><td class="td-n" style="color:var(--good)">6.2 mg/L</td><td><span class="chip c-ok"><span class="cdot"></span>PASS</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- D · Output Control -->
+  <div class="card ct-border">
+    <div class="ct ct-ct">D · Output Control</div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">TARGET OUTPUT TEMP</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-ot">28.5</span><span class="cu">°C</span></div></div><input type="range" class="sl-ct" min="15" max="45" step=".5" value="28.5" style="--p:45%" oninput="sv('ct-ot',this,15,45,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">DISCHARGE RATE</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-dr">5018</span><span class="cu">L/min</span></div></div><input type="range" class="sl-ct" min="500" max="10000" step="10" value="5018" style="--p:48%" oninput="sv('ct-dr',this,500,10000,0)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">BLOWDOWN RATE</div><div class="cv-wrap"><span class="cv" style="color:#00b4d8" id="ct-bd">34</span><span class="cu">L/min</span></div></div><input type="range" class="sl-ct" min="0" max="200" step="1" value="34" style="--p:17%" oninput="sv('ct-bd',this,0,200,0)"></div>
+    <div class="ctrl"><div class="cl">DISCHARGE DESTINATION</div><select class="ctrl-select" style="margin-top:4px"><option selected>Receiving River — R-07</option><option>Cooling Pond CP-1</option><option>Holding Pond A</option><option>Municipal Drain</option></select></div>
+    <div class="srow"><div class="slbl">OUTPUT pH</div><div><div class="sval" style="color:#00b4d8">7.0</div><span class="chip c-ok"><span class="cdot"></span>NEUTRAL</span></div></div>
+    <div class="srow"><div class="slbl">DO OUTPUT</div><div><div class="sval" style="color:#00b4d8">6.2 mg/L</div><span class="chip c-ok"><span class="cdot"></span>RESTORED</span></div></div>
+    <div class="srow"><div class="slbl">OUTLET TSS</div><div><div class="sval" style="color:#00b4d8">65 mg/L</div><span class="chip c-ok"><span class="cdot"></span>WITHIN LIMIT</span></div></div>
+    <div class="trow"><div><div class="t-sub">Auto pH Correction</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+    <div class="trow"><div><div class="t-sub">Heat Reuse Pipeline</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+    <div class="trow"><div><div class="t-sub">Auto Shutoff</div><div class="t-lbl">Triggers at 36°C outlet threshold</div></div><div class="toggle" onclick="tog(this)"></div></div>
+  </div>
+
+  <!-- Sensor Network -->
+  <div class="card">
+    <div class="ct" style="color:#00b4d8">Sensor Network — CT-2</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>SENSOR ID</th><th>LOCATION</th><th>PARAMETER</th><th>READING</th><th>STATUS</th></tr></thead>
+      <tbody>
+        <tr><td class="td-m">SNS-C01</td><td>Inlet Pipe</td><td class="td-m">Temperature</td><td class="td-n" style="color:var(--a2)">76.8°C</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+        <tr><td class="td-m">SNS-C02</td><td>Fill Media</td><td class="td-m">Temperature</td><td class="td-n" style="color:var(--a4)">48.2°C</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+        <tr><td class="td-m">SNS-C03</td><td>Cold Basin</td><td class="td-m">Temperature</td><td class="td-n" style="color:var(--a3)">28.4°C</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+        <tr><td class="td-m">SNS-C04</td><td>Cold Basin</td><td class="td-m">DO</td><td class="td-n" style="color:var(--a3)">6.2 mg/L</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+        <tr><td class="td-m">SNS-C05</td><td>Cold Basin</td><td class="td-m">pH</td><td class="td-n" style="color:var(--a3)">7.0</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+        <tr><td class="td-m">SNS-C06</td><td>Inlet Pipe</td><td class="td-m">Flow Rate</td><td class="td-n" style="color:#00b4d8">5,120 L/min</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+        <tr><td class="td-m">SNS-C07</td><td>Bypass V-12</td><td class="td-m">Valve Position</td><td class="td-n" style="color:var(--mid)">62% open</td><td><span class="chip c-warn"><span class="cdot"></span>HIGH</span></td></tr>
+        <tr><td class="td-m">SNS-C08</td><td>HX Unit</td><td class="td-m">HX Effectiveness</td><td class="td-n" style="color:var(--mid)">88.4%</td><td><span class="chip c-warn"><span class="cdot"></span>LOW</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ── COOLING POND MONITORING ── -->
+<div id="page-pond" class="page">
+  <div class="ph">
+    <div>
+      <div class="ph-title pond-header-accent">Cooling Pond</div>
+      <div class="ph-sub">CP-1 · EAST LAGOON · LIVE MONITORING</div>
+    </div>
+    <div class="ph-act">
+      <button class="btn" style="border-color:#00c9a7;color:#00c9a7;font-size:.7rem;padding:7px 10px" onclick="toast('Pond data exported.')">📋 Export</button>
+      <button class="page-stop-btn" id="pond-stop-btn" onclick="openStopModal(null)">⛔ Stop</button>
+      <button class="btn b-s" onclick="saveActiveSystem()">💾 Save</button>
+    </div>
+  </div>
+
+  <!-- Pond Status Banner -->
+  <div style="background:rgba(0,201,167,.08);border:1px solid rgba(0,201,167,.25);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:8px;height:8px;border-radius:50%;background:#00c9a7;box-shadow:0 0 8px #00c9a7;animation:pulse 2s ease-in-out infinite;flex-shrink:0"></div>
+      <div>
+        <div style="font-family:'Alata',sans-serif;font-size:.95rem;font-weight:700;color:#00c9a7">DLSU Cooling Pond CP-1</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--text2);margin-top:1px">LTPCS-004 · Open-Surface Retention · Zone 3 — East Lagoon</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="chip c-ok"><span class="cdot"></span>ONLINE</span>
+      <span class="pond-zone-badge">🏞️ POND</span>
+    </div>
+  </div>
+
+  <div id="pond-alert-panel"></div>
+
+  <!-- KPI Row -->
+  <div class="kpi-scroll">
+    <div class="kpi kc-pond" style="border-bottom:2px solid #00c9a7">
+      <div class="kpi-lbl">SURFACE TEMP</div>
+      <div class="kpi-val" style="color:#00c9a7"><span id="pond-kpi-it">52.4</span> <span class="kpi-unit">°C</span></div>
+      <div class="kpi-ch dn" id="pond-kpi-it-trend">▼ Live</div>
+    </div>
+    <div class="kpi kc-pond" style="border-bottom:2px solid #00b4d8">
+      <div class="kpi-lbl">INFLOW RATE</div>
+      <div class="kpi-val" style="color:#00b4d8"><span id="pond-kpi-flow">3,200</span> <span class="kpi-unit">L/min</span></div>
+      <div class="kpi-ch st">— Live</div>
+    </div>
+    <div class="kpi kc-pond" style="border-bottom:2px solid var(--a3)">
+      <div class="kpi-lbl">DISSIP. EFF.</div>
+      <div class="kpi-val" style="color:var(--a3)"><span id="pond-kpi-eff">87.5</span> <span class="kpi-unit">%</span></div>
+      <div class="kpi-ch dn">▲ Stable</div>
+    </div>
+    <div class="kpi kc-pond" style="border-bottom:2px solid var(--a4)">
+      <div class="kpi-lbl">OUTLET TEMP</div>
+      <div class="kpi-val" style="color:var(--a4)"><span id="pond-kpi-out">29.6</span> <span class="kpi-unit">°C</span></div>
+      <div class="kpi-ch st" id="pond-kpi-out-status">— Compliant</div>
+    </div>
+    <div class="kpi kc-pond" style="border-bottom:2px solid var(--a5)">
+      <div class="kpi-lbl">POND VOLUME</div>
+      <div class="kpi-val" style="color:var(--a5)"><span id="pond-kpi-vol">4,820</span> <span class="kpi-unit">m³</span></div>
+      <div class="kpi-ch st">— Estimated</div>
+    </div>
+    <div class="kpi kc-pond" style="border-bottom:2px solid var(--a2)">
+      <div class="kpi-lbl">EVAP. RATE</div>
+      <div class="kpi-val" style="color:var(--a2)"><span id="pond-kpi-evap">18.4</span> <span class="kpi-unit">mm/d</span></div>
+      <div class="kpi-ch up" id="pond-kpi-evap-status">▲ High</div>
+    </div>
+  </div>
+
+  <!-- Pond Schematic Map -->
+  <div class="card">
+    <div class="ct pond-ct">Pond Layout — Zone 3
+      <span class="pond-zone-badge">CP-1 · 4,820 m³</span>
+    </div>
+    <div class="pond-map">
+      <div class="pond-map-water">
+        <div class="pond-map-wave"></div>
+        <!-- Sensor dots -->
+        <div class="pond-sensor-dot" style="top:18%;left:15%"></div>
+        <div class="pond-sensor-dot" style="top:55%;left:50%;animation-delay:.7s"></div>
+        <div class="pond-sensor-dot" style="top:25%;right:18%;animation-delay:1.4s"></div>
+        <!-- Zone labels -->
+        <div class="pond-map-label" style="top:10%;left:10%">INLET ZONE</div>
+        <div class="pond-map-label" style="top:45%;left:42%">RETENTION</div>
+        <div class="pond-map-label" style="top:15%;right:10%">OUTLET ZONE</div>
+        <!-- Inlet arrow -->
+        <div style="position:absolute;bottom:6px;left:8px;font-family:'Share Tech Mono',monospace;font-size:.48rem;color:rgba(0,180,215,.7)">← INFLOW 3,200 L/min</div>
+        <!-- Outlet arrow -->
+        <div style="position:absolute;bottom:6px;right:8px;font-family:'Share Tech Mono',monospace;font-size:.48rem;color:rgba(0,201,167,.7)">OUTFLOW → 29.6°C</div>
+      </div>
+      <div style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-family:'Share Tech Mono',monospace;font-size:.48rem;color:var(--muted);letter-spacing:1px">● SENSOR NODE</div>
+    </div>
+  </div>
+
+  <!-- Water Quality -->
+  <div class="card pond-border">
+    <div class="ct pond-ct">A · Water Quality Inputs</div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">INFLOW TEMPERATURE</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-it">52.4</span><span class="cu">°C</span></div></div><input type="range" class="sl-pond" min="20" max="90" step=".5" value="52.4" style="--p:45%" oninput="sv('v-pond-it',this,20,90,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">INFLOW RATE</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-fl">3200</span><span class="cu">L/min</span></div></div><input type="range" class="sl-pond" min="500" max="6000" step="10" value="3200" style="--p:49%" oninput="sv('v-pond-fl',this,500,6000,0)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">INFLOW pH</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-ph">7.1</span><span class="cu">pH</span></div></div><input type="range" class="sl-pond" min="5" max="10" step=".1" value="7.1" style="--p:42%" oninput="sv('v-pond-ph',this,5,10,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">SUSPENDED SOLIDS (TSS)</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-ts">62</span><span class="cu">mg/L</span></div></div><input type="range" class="sl-pond" min="0" max="300" step="1" value="62" style="--p:21%" oninput="sv('v-pond-ts',this,0,300,0)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">DISSOLVED OXYGEN (DO)</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-do">6.8</span><span class="cu">mg/L</span></div></div><input type="range" class="sl-pond" min="0" max="14" step=".1" value="6.8" style="--p:49%" oninput="sv('v-pond-do',this,0,14,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">CONDUCTIVITY</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-cond">420</span><span class="cu">µS/cm</span></div></div><input type="range" class="sl-pond" min="50" max="1000" step="5" value="420" style="--p:39%" oninput="sv('v-pond-cond',this,50,1000,0)"></div>
+  </div>
+
+  <!-- Pond Operating Variables -->
+  <div class="card pond-border">
+    <div class="ct pond-ct">B · Pond Operating Variables</div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">AMBIENT AIR TEMP</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-amb">33.0</span><span class="cu">°C</span></div></div><input type="range" class="sl-pond" min="15" max="45" step=".5" value="33.0" style="--p:60%" oninput="sv('v-pond-amb',this,15,45,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">WIND SPEED</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-wind">4.2</span><span class="cu">m/s</span></div></div><input type="range" class="sl-pond" min="0" max="15" step=".1" value="4.2" style="--p:28%" oninput="sv('v-pond-wind',this,0,15,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">RELATIVE HUMIDITY</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-rh">74</span><span class="cu">%</span></div></div><input type="range" class="sl-pond" min="10" max="100" step="1" value="74" style="--p:71%" oninput="sv('v-pond-rh',this,10,100,0)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">HYDRAULIC RET. TIME</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-hrt">1.51</span><span class="cu">days</span></div></div><input type="range" class="sl-pond" min=".5" max="5" step=".01" value="1.51" style="--p:25%" oninput="sv('v-pond-hrt',this,.5,5,2)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">SOLAR RADIATION</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-sol">620</span><span class="cu">W/m²</span></div></div><input type="range" class="sl-pond" min="0" max="1200" step="5" value="620" style="--p:52%" oninput="sv('v-pond-sol',this,0,1200,0)"></div>
+    <div class="ctrl"><div class="cl">POND MIXING MODE</div><select class="ctrl-select" style="margin-top:4px"><option selected>Natural Convection</option><option>Mechanical Aerator</option><option>Surface Spray</option><option>Stratified (No Mix)</option></select></div>
+    <div class="trow"><div><div class="t-sub">Mechanical Aerator (AER-01)</div><div class="t-lbl">Boosts surface evaporation</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+    <div class="trow"><div><div class="t-sub">Surface Spray Nozzles</div><div class="t-lbl">Increases evaporative cooling area</div></div><div class="toggle" onclick="tog(this)"></div></div>
+    <div class="trow"><div><div class="t-sub">Auto-Blowdown</div><div class="t-lbl">TDS concentration control</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+    <div class="trow"><div><div class="t-sub">Algae Dosing (Auto)</div><div class="t-lbl">Biological control active</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+  </div>
+
+  <!-- Performance Metrics -->
+  <div class="card pond-border">
+    <div class="ct pond-ct">C · Thermal Dissipation Performance</div>
+    <div class="kpi-scroll">
+      <div class="kpi" style="border-bottom:2px solid #00c9a7;flex-shrink:0;width:140px">
+        <div class="kpi-lbl">ΔT ACHIEVED</div>
+        <div class="kpi-val" style="color:#00c9a7;font-size:1.3rem">22.8 <span class="kpi-unit">°C</span></div>
+        <div class="kpi-ch dn">Good</div>
+      </div>
+      <div class="kpi" style="border-bottom:2px solid var(--a3);flex-shrink:0;width:140px">
+        <div class="kpi-lbl">DISSIP. EFF.</div>
+        <div class="kpi-val" style="color:var(--a3);font-size:1.3rem">87.5 <span class="kpi-unit">%</span></div>
+        <div class="kpi-ch dn">▲ +0.8%</div>
+      </div>
+      <div class="kpi" style="border-bottom:2px solid var(--a2);flex-shrink:0;width:140px">
+        <div class="kpi-lbl">EVAP. LOSS</div>
+        <div class="kpi-val" style="color:var(--a2);font-size:1.3rem">18.4 <span class="kpi-unit">mm/d</span></div>
+        <div class="kpi-ch up">▲ Elevated</div>
+      </div>
+      <div class="kpi" style="border-bottom:2px solid var(--a5);flex-shrink:0;width:140px">
+        <div class="kpi-lbl">HEAT REJECTED</div>
+        <div class="kpi-val" style="color:var(--a5);font-size:1.3rem">2.1 <span class="kpi-unit">MW</span></div>
+        <div class="kpi-ch st">— Stable</div>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <div class="ctrl"><div class="ctrl-top"><div class="cl">THERMAL DISSIPATION EFF.</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7">87.5</span><span class="cu">%</span></div></div><div class="bar-bg"><div class="bar" style="width:87.5%;background:#00c9a7"></div></div></div>
+      <div class="ctrl"><div class="ctrl-top"><div class="cl">DO RESTORATION</div><div class="cv-wrap"><span class="cv" style="color:var(--a3)">82</span><span class="cu">%</span></div></div><div class="bar-bg"><div class="bar" style="width:82%;background:var(--a3)"></div></div></div>
+      <div class="ctrl"><div class="ctrl-top"><div class="cl">TSS SETTLING EFF.</div><div class="cv-wrap"><span class="cv" style="color:var(--a4)">78</span><span class="cu">%</span></div></div><div class="bar-bg"><div class="bar" style="width:78%;background:var(--a4)"></div></div></div>
+    </div>
+
+    <!-- Compliance table -->
+    <div style="margin-top:14px;font-family:'Alata',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:1.5px;color:#00c9a7;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--border)">Regulatory Compliance</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>REGULATION</th><th>LIMIT</th><th>CURRENT</th><th>STATUS</th></tr></thead>
+        <tbody>
+          <tr><td>EPA §316(a) ΔT</td><td class="td-m">≤+3.0°C</td><td class="td-n" style="color:var(--good)">+1.6°C</td><td><span class="chip c-ok"><span class="cdot"></span>PASS</span></td></tr>
+          <tr><td>NPDES Outlet Temp</td><td class="td-m">≤36°C</td><td class="td-n" style="color:var(--good)">29.6°C</td><td><span class="chip c-ok"><span class="cdot"></span>PASS</span></td></tr>
+          <tr><td>DO Minimum</td><td class="td-m">≥5 mg/L</td><td class="td-n" style="color:var(--good)">6.8 mg/L</td><td><span class="chip c-ok"><span class="cdot"></span>PASS</span></td></tr>
+          <tr><td>TSS Limit</td><td class="td-m">≤100 mg/L</td><td class="td-n" style="color:var(--good)">62 mg/L</td><td><span class="chip c-ok"><span class="cdot"></span>PASS</span></td></tr>
+          <tr><td>Algae / TDS</td><td class="td-m">≤800 µS/cm</td><td class="td-n" style="color:var(--good)">420 µS/cm</td><td><span class="chip c-ok"><span class="cdot"></span>PASS</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Output Control -->
+  <div class="card pond-border">
+    <div class="ct pond-ct">D · Pond Output Control</div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">TARGET OUTLET TEMP</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-ot">29.5</span><span class="cu">°C</span></div></div><input type="range" class="sl-pond" min="15" max="40" step=".5" value="29.5" style="--p:58%" oninput="sv('v-pond-ot',this,15,40,1)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">DISCHARGE RATE</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-dr">3140</span><span class="cu">L/min</span></div></div><input type="range" class="sl-pond" min="500" max="6000" step="10" value="3140" style="--p:48%" oninput="sv('v-pond-dr',this,500,6000,0)"></div>
+    <div class="ctrl"><div class="ctrl-top"><div class="cl">BLOWDOWN / MAKEUP RATE</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-bd">60</span><span class="cu">L/min</span></div></div><input type="range" class="sl-pond" min="0" max="300" step="1" value="60" style="--p:20%" oninput="sv('v-pond-bd',this,0,300,0)"></div>
+    <div class="ctrl"><div class="cl">DISCHARGE DESTINATION</div><select class="ctrl-select"><option selected>Receiving River — R-07</option><option>Secondary Pond CP-2</option><option>Municipal Drain</option><option>Irrigation Reuse</option></select></div>
+    <div class="srow"><div class="slbl">OUTPUT pH</div><div><div class="sval" style="color:#00c9a7">7.0</div><span class="chip c-ok"><span class="cdot"></span>NEUTRAL</span></div></div>
+    <div class="srow"><div class="slbl">OUTLET DO</div><div><div class="sval" style="color:#00c9a7">6.8 mg/L</div><span class="chip c-ok"><span class="cdot"></span>RESTORED</span></div></div>
+    <div class="srow"><div class="slbl">OUTLET TSS</div><div><div class="sval" style="color:#00c9a7">62 mg/L</div><span class="chip c-ok"><span class="cdot"></span>WITHIN LIMIT</span></div></div>
+    <div class="trow"><div><div class="t-sub">Auto pH Correction</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+    <div class="trow"><div><div class="t-sub">Overflow Gate OG-01</div><div class="t-lbl">Auto-opens at 95% capacity</div></div><div class="toggle on" onclick="tog(this)"></div></div>
+    <div class="trow"><div><div class="t-sub">Emergency Drain Valve</div></div><div class="toggle" onclick="tog(this)"></div></div>
+  </div>
+
+  <!-- Pond Sensor Network -->
+  <div class="card">
+    <div class="ct" style="color:#00c9a7">Sensor Network — CP-1</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>SENSOR ID</th><th>LOCATION</th><th>PARAMETER</th><th>READING</th><th>STATUS</th></tr></thead>
+        <tbody>
+          <tr><td class="td-m">SNS-P01</td><td>Inlet Zone</td><td class="td-m">Temperature</td><td class="td-n" style="color:var(--a2)">52.4°C</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+          <tr><td class="td-m">SNS-P02</td><td>Mid Pond</td><td class="td-m">Temperature</td><td class="td-n" style="color:var(--a4)">41.2°C</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+          <tr><td class="td-m">SNS-P03</td><td>Outlet Zone</td><td class="td-m">Temperature</td><td class="td-n" style="color:var(--a3)">29.6°C</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+          <tr><td class="td-m">SNS-P04</td><td>Mid Pond</td><td class="td-m">DO</td><td class="td-n" style="color:var(--a3)">6.8 mg/L</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+          <tr><td class="td-m">SNS-P05</td><td>Mid Pond</td><td class="td-m">pH</td><td class="td-n" style="color:var(--a3)">7.1</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+          <tr><td class="td-m">SNS-P06</td><td>Inlet Zone</td><td class="td-m">Flow Rate</td><td class="td-n" style="color:#00b4d8">3,200 L/min</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+          <tr><td class="td-m">SNS-P07</td><td>Outlet Zone</td><td class="td-m">Conductivity</td><td class="td-n" style="color:var(--a5)">420 µS/cm</td><td><span class="chip c-ok"><span class="cdot"></span>OK</span></td></tr>
+          <tr><td class="td-m">SNS-P08</td><td>Surface</td><td class="td-m">Evap. Rate</td><td class="td-n" style="color:var(--a2)">18.4 mm/d</td><td><span class="chip c-warn"><span class="cdot"></span>HIGH</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /main -->
+
+<!-- ════ BOTTOM NAV ════ -->
+<div class="bnav">
+  <div class="bn active" id="bn-dashboard" onclick="goTo('dashboard')"><div class="bn-icon">📊</div><div class="bn-lbl">DASH</div></div>
+  <div class="bn" id="bn-input" onclick="goTo('input')"><div class="bn-icon">📥</div><div class="bn-lbl">INPUT</div></div>
+  <div class="bn" id="bn-systems" onclick="goTo('systems')"><div class="bn-icon">🏭</div><div class="bn-lbl">SYSTEMS</div></div>
+  <div class="bn" id="bn-alerts" onclick="goTo('alerts')"><div class="bn-icon">🔔</div><div class="bn-lbl">ALERTS</div><div class="bn-badge">3</div></div>
+  <div class="bn" id="bn-more" onclick="toggleSidebar()"><div class="bn-icon">☰</div><div class="bn-lbl">MORE</div></div>
+</div>
+
+<!-- ════ ADD/EDIT SYSTEM MODAL ════ -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">➕ Add New System</div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-lbl">System Name *</label>
+        <input class="t-input" type="text" id="form-name" placeholder="e.g. Cooling Tower CT-3">
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label class="form-lbl">System ID *</label>
+          <input class="t-input" type="text" id="form-id" placeholder="e.g. SYS-003">
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Type</label>
+          <select class="ctrl-select" id="form-type" style="margin-top:0">
+            <option value="Cooling Tower">Cooling Tower</option>
+            <option value="Heat Exchanger">Heat Exchanger</option>
+            <option value="Wastewater Treatment">Wastewater Treatment</option>
+            <option value="Industrial Discharge">Industrial Discharge</option>
+            <option value="Power Plant Cooling">Power Plant Cooling</option>
+            <option value="Cooling Pond">Cooling Pond</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-lbl">Location / Station</label>
+        <input class="t-input" type="text" id="form-loc" placeholder="e.g. Station 05-Beta, Zone 3">
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label class="form-lbl">Inlet Temp (°C)</label>
+          <input class="t-input" type="number" id="form-intemp" placeholder="e.g. 82" value="82">
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Flow Rate (L/min)</label>
+          <input class="t-input" type="number" id="form-flow" placeholder="e.g. 2400" value="2400">
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label class="form-lbl">Heat Load (MW)</label>
+          <input class="t-input" type="number" id="form-load" placeholder="e.g. 3.5" step=".1" value="3.5">
+        </div>
+        <div class="form-row">
+          <label class="form-lbl">Efficiency (%)</label>
+          <input class="t-input" type="number" id="form-eff" placeholder="e.g. 94" value="94">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-lbl">Status</label>
+        <select class="ctrl-select" id="form-status" style="margin-top:0">
+          <option value="online">Online</option>
+          <option value="offline">Offline</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="warning">Warning</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-lbl">Notes</label>
+        <input class="t-input" type="text" id="form-notes" placeholder="Optional notes or description">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn b-s" style="flex:1;justify-content:center" onclick="saveSystem()">✓ Save System</button>
+      <button class="btn b-d" onclick="closeModal()" style="padding:9px 14px">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ DELETE CONFIRM MODAL ════ -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal del-modal" style="max-width:380px">
+    <div class="modal-head">
+      <div class="modal-title" style="color:var(--bad)">🗑 Delete System</div>
+      <div class="modal-close" onclick="closeDelModal()">✕</div>
+    </div>
+    <div class="modal-body">
+      <div style="font-family:'Exo 2',sans-serif;font-size:.9rem;margin-bottom:10px">Are you sure you want to remove <strong id="del-sys-name" style="color:var(--accent)">—</strong>?</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--bad);background:rgba(255,59,59,.06);border:1px solid rgba(255,59,59,.2);padding:10px;border-radius:2px">⚠ This will permanently remove the system and all its configuration from this interface. This cannot be undone.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn b-d" style="flex:1;justify-content:center" onclick="confirmDelete()">🗑 Yes, Delete</button>
+      <button class="btn b-p" onclick="closeDelModal()" style="padding:9px 14px">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════ AUTH / LOGIN VERIFICATION MODAL ════ -->
+<div class="auth-modal-overlay" id="authModal">
+  <div class="auth-modal">
+    <div class="auth-top">
+      <div class="auth-icon" id="auth-icon">🔒</div>
+      <div class="auth-title">Verification Required</div>
+      <div class="auth-sub">This action requires your login credentials<br>to confirm your identity before proceeding.</div>
+      <div class="auth-action-desc" id="auth-action-desc">Action: Clear / Resolve Alert Logs</div>
+    </div>
+    <div class="auth-body">
+      <div class="auth-field">
+        <label class="auth-lbl" for="auth-user">Username / Employee ID</label>
+        <input class="auth-input" type="text" id="auth-user" placeholder="e.g. jreyes or ENG-0042" autocomplete="username">
+      </div>
+      <div class="auth-field">
+        <label class="auth-lbl" for="auth-pass">Password</label>
+        <input class="auth-input" type="password" id="auth-pass" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()">
+        <div class="auth-error" id="auth-error">⚠ Incorrect credentials. Please try again.</div>
+      </div>
+      <div class="auth-attempts" id="auth-attempts-txt"></div>
+    </div>
+    <div class="auth-foot">
+      <button class="btn b-s" style="width:100%;justify-content:center;font-size:.85rem" onclick="submitAuth()">🔓 Verify &amp; Proceed</button>
+      <button class="btn b-w" style="width:100%;justify-content:center;font-size:.8rem" onclick="closeAuthModal()">Cancel</button>
+      <div class="auth-hint">Demo credentials: <strong style="color:var(--accent)">jreyes</strong> / <strong style="color:var(--accent)">ltpcs2026</strong></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════ STOP SYSTEM MODAL ════ -->
+<div class="stop-modal-overlay" id="stopModal">
+  <div class="stop-modal">
+    <div class="stop-modal-head">
+      <div class="stop-modal-title" id="stop-modal-title">⛔ Stop / Restart System</div>
+      <div style="cursor:pointer;color:var(--text2);font-size:1rem;padding:4px 8px" onclick="closeStopModal()">✕</div>
+    </div>
+    <div class="stop-modal-body">
+      <div style="font-family:'Exo 2',sans-serif;font-size:.9rem;margin-bottom:12px;color:var(--text)">
+        Stop <strong id="stop-sys-display" style="color:var(--bad)">—</strong>?
+      </div>
+      <div id="stop-options" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1px solid var(--border2);border-radius:2px;">
+          <input type="radio" name="stop-type" value="active" checked style="accent-color:var(--bad)">
+          <div><div style="font-family:'Alata',sans-serif;font-size:.85rem">Stop Active System Only</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--muted);margin-top:2px" id="stop-active-label">Stops the currently selected system</div></div>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1px solid var(--border2);border-radius:2px;">
+          <input type="radio" name="stop-type" value="all" style="accent-color:var(--bad)">
+          <div><div style="font-family:'Alata',sans-serif;font-size:.85rem">Stop All Systems</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--muted);margin-top:2px">Emergency fleet-wide shutdown</div></div>
+        </label>
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--bad);background:rgba(255,59,59,.06);border:1px solid rgba(255,59,59,.15);padding:10px;border-radius:2px">
+        ⚠ Stopping a system sets it OFFLINE and disables all controls. Restarting restores full operation. Use "Stop All" for emergency fleet shutdown.
+      </div>
+    </div>
+    <div class="stop-modal-foot">
+      <button class="btn b-d" style="flex:1;justify-content:center" onclick="confirmStop()">⛔ Confirm Stop</button>
+      <button class="btn b-p" onclick="closeStopModal()" style="padding:9px 14px">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TOAST ════ -->
+<div id="toast">✓ <span id="toast-msg">Done.</span></div>
+
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════════════════════
+//  CONFIGURATION & DATA
+// ══════════════════════════════════════════════════════════════
+
+const statusConfig = {
+  online:      { color:'var(--good)',   label:'ONLINE',      chip:'c-ok'   },
+  offline:     { color:'var(--muted)', label:'OFFLINE',     chip:'c-bad'  },
+  maintenance: { color:'var(--mid)',   label:'MAINTENANCE', chip:'c-warn' },
+  warning:     { color:'var(--bad)',   label:'WARNING',     chip:'c-warn' },
+};
+
+// Default safe-operating thresholds
+const T = {
+  inletMax:90, inletWarn:80,
+  epaDTMax:3.0, epaDTWarn:2.5,
+  effMin:85, effWarn:90,
+  tssMax:300, tsswarn:200,
+  doMin:5.0, doWarn:6.0,
+  phMin:6.0, phMax:9.0, phWarnLo:6.5, phWarnHi:8.5,
+  bypassWarn:70, flowMax:9000,
+  condWarn:700
+};
+
+let systems = [
+  { id:'LTPCS-001', name:'LaSalle Station 01-Alpha',  type:'Wastewater Treatment', loc:'Zone 1 — Main Plant',   intemp:84.3, flow:2840, load:4.2, eff:96.2, status:'online',  notes:'Primary thermal control unit' },
+  { id:'LTPCS-002', name:'DLSU Cooling Tower CT-2',   type:'Cooling Tower',         loc:'Zone 2 — North Block',  intemp:76.8, flow:5120, load:3.1, eff:91.0, status:'online',  notes:'Secondary evaporative cooling' },
+  { id:'LTPCS-003', name:'DLSU HX Unit HX-1',         type:'Heat Exchanger',         loc:'Zone 1 — Sub-Station',  intemp:88.0, flow:1980, load:2.8, eff:88.4, status:'warning', notes:'Fouling detected — schedule maintenance' },
+  { id:'LTPCS-004', name:'DLSU Cooling Pond CP-1',    type:'Cooling Pond',           loc:'Zone 3 — East Lagoon',  intemp:52.4, flow:3200, load:2.1, eff:87.5, status:'online',  notes:'Open-surface thermal dissipation pond' },
+];
+
+let activeSystemIdx = 0;
+let editingIdx  = null;
+let deletingIdx = null;
+let stopTargetIdx = null;
+
+// Per-system live state — keyed by system.id
+const STATE = {};
+// Stopped system IDs
+const STOPPED = new Set();
+
+// ── Derived helpers
+function outTemp(st)  { return parseFloat((st.intemp * 0.37).toFixed(1)); }
+function epaDT(st)    { return parseFloat((outTemp(st) - 28.8).toFixed(1)); }
+function deltaT(st)   { return parseFloat((st.intemp - st.ambTemp).toFixed(1)); }
+function tssRemoval(st){ return Math.min(99, Math.round(st.eff * 0.955)); }
+
+function initState(s) {
+  if (STATE[s.id]) return;
+  const pond = s.type === 'Cooling Pond';
+  STATE[s.id] = {
+    intemp: s.intemp,
+    flow:   s.flow,
+    load:   s.load,
+    eff:    s.eff,
+    ph:     7.2,
+    tss:    pond ? 62  : 148,
+    doVal:  pond ? 6.8 : 4.1,
+    ps:     2.5,
+    cond:   pond ? 420 : 420,
+    ambTemp:    31.1,
+    coolantFlow: s.flow,
+    bypassValve: 62,
+    pressureDrop: 1.8,
+    rh:     74,
+    windSpeed: 4.2,
+    hrt:   1.51,
+    solar: 620,
+    outTempTarget: parseFloat((s.intemp * 0.37).toFixed(1)),
+    dischargeRate: Math.round(s.flow * 0.98),
+    blowdownRate:  pond ? 60 : 34,
+  };
+}
+
+function initAllStates() {
+  systems.forEach(s => initState(s));
+}
+
+function getSt() {
+  const s = systems[activeSystemIdx];
+  if (!s) return null;
+  initState(s);
+  return STATE[s.id];
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SLIDER & TOGGLE HELPERS
+// ══════════════════════════════════════════════════════════════
+
+function decFor(step) {
+  if (step >= 1)   return 0;
+  if (step >= 0.1) return 1;
+  return 2;
+}
+
+// Called by oninput on every range input
+function sv(spanId, el, min, max, dec) {
+  const val = parseFloat(el.value);
+  const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
+  el.style.setProperty('--p', pct.toFixed(1) + '%');
+
+  // Update the value display span next to the slider
+  const span = document.getElementById(spanId);
+  if (span) span.textContent = val.toFixed(parseInt(dec) || 0);
+
+  // Write to STATE
+  const s = systems[activeSystemIdx];
+  if (!s) return;
+  initState(s);
+  const st = STATE[s.id];
+
+  const MAP = {
+    // Input
+    'dv-it':'intemp','dv-fl':'flow','dv-hl':'load','dv-ph':'ph',
+    'dv-ts':'tss','dv-do':'doVal','dv-ps':'ps','dv-cond':'cond',
+    // Operating
+    'dv-at':'ambTemp','dv-cf':'coolantFlow','dv-bv':'bypassValve',
+    'dv-pd':'pressureDrop','dv-rh':'rh',
+    'dv-amb':'ambTemp','dv-wind':'windSpeed','dv-hrt':'hrt','dv-sol':'solar',
+    // Output
+    'dv-ot':'outTempTarget','dv-dr':'dischargeRate','dv-bd':'blowdownRate',
+    // CT page
+    'ct-it':'intemp','ct-fl':'flow','ct-hl':'load','ct-ph':'ph',
+    'ct-ts':'tss','ct-do':'doVal','ct-ps':'ps',
+    'ct-at':'ambTemp','ct-cf':'coolantFlow','ct-bv':'bypassValve',
+    'ct-pd':'pressureDrop','ct-rh':'rh',
+    'ct-ot':'outTempTarget','ct-dr':'dischargeRate','ct-bd':'blowdownRate',
+    // Pond page
+    'v-pond-it':'intemp','v-pond-fl':'flow','v-pond-ph':'ph',
+    'v-pond-ts':'tss','v-pond-do':'doVal','v-pond-cond':'cond',
+    'v-pond-amb':'ambTemp','v-pond-wind':'windSpeed','v-pond-rh':'rh',
+    'v-pond-hrt':'hrt','v-pond-sol':'solar',
+    'v-pond-ot':'outTempTarget','v-pond-dr':'dischargeRate','v-pond-bd':'blowdownRate',
+  };
+  const key = MAP[spanId];
+  if (key) st[key] = val;
+
+  // Keep master system object in sync
+  if (key === 'intemp') s.intemp = val;
+  if (key === 'flow')   s.flow   = Math.round(val);
+  if (key === 'load')   s.load   = val;
+  if (key === 'eff')    s.eff    = val;
+
+  // Update ALL related display spans surgically (no page re-render)
+  updateRelatedDisplays(s, st);
+  // Update compliance
+  runCompliance(s, st);
+}
+
+function tog(el) {
+  el.classList.toggle('on');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  const m = document.getElementById('toast-msg');
+  if (!t || !m) return;
+  m.textContent = msg || 'Done.';
+  t.style.display = 'block';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => { t.style.display = 'none'; }, 2800);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SURGICAL DISPLAY UPDATE — no page re-render
+// ══════════════════════════════════════════════════════════════
+function set$(id, v) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = String(v);
+}
+
+function updateRelatedDisplays(s, st) {
+  const ot   = outTemp(st);
+
+  // ── All slider value spans (covers every page)
+  set$('dv-it',  st.intemp.toFixed(1));
+  set$('dv-fl',  Math.round(st.flow).toString());
+  set$('dv-hl',  st.load.toFixed(1));
+  set$('dv-ph',  st.ph.toFixed(1));
+  set$('dv-ts',  Math.round(st.tss).toString());
+  set$('dv-do',  st.doVal.toFixed(1));
+  set$('dv-ps',  st.ps.toFixed(1));
+  set$('dv-cond',Math.round(st.cond).toString());
+  set$('dv-at',  st.ambTemp.toFixed(1));
+  set$('dv-cf',  Math.round(st.coolantFlow).toString());
+  set$('dv-bv',  Math.round(st.bypassValve).toString());
+  set$('dv-pd',  st.pressureDrop.toFixed(1));
+  set$('dv-rh',  Math.round(st.rh).toString());
+  set$('dv-amb', st.ambTemp.toFixed(1));
+  set$('dv-wind',st.windSpeed.toFixed(1));
+  set$('dv-hrt', st.hrt.toFixed(2));
+  set$('dv-sol', Math.round(st.solar).toString());
+  set$('dv-ot',  st.outTempTarget.toFixed(1));
+  set$('dv-dr',  Math.round(st.dischargeRate).toString());
+  set$('dv-bd',  Math.round(st.blowdownRate).toString());
+
+  // CT page spans
+  set$('ct-it',  st.intemp.toFixed(1));
+  set$('ct-fl',  Math.round(st.flow).toString());
+  set$('ct-hl',  st.load.toFixed(1));
+  set$('ct-ph',  st.ph.toFixed(1));
+  set$('ct-ts',  Math.round(st.tss).toString());
+  set$('ct-do',  st.doVal.toFixed(1));
+  set$('ct-ps',  st.ps.toFixed(1));
+  set$('ct-at',  st.ambTemp.toFixed(1));
+  set$('ct-cf',  Math.round(st.coolantFlow).toString());
+  set$('ct-bv',  Math.round(st.bypassValve).toString());
+  set$('ct-pd',  st.pressureDrop.toFixed(1));
+  set$('ct-rh',  Math.round(st.rh).toString());
+  set$('ct-ot',  st.outTempTarget.toFixed(1));
+  set$('ct-dr',  Math.round(st.dischargeRate).toString());
+  set$('ct-bd',  Math.round(st.blowdownRate).toString());
+
+  // Pond page spans
+  set$('v-pond-it',  st.intemp.toFixed(1));
+  set$('v-pond-fl',  Math.round(st.flow).toString());
+  set$('v-pond-ph',  st.ph.toFixed(1));
+  set$('v-pond-ts',  Math.round(st.tss).toString());
+  set$('v-pond-do',  st.doVal.toFixed(1));
+  set$('v-pond-cond',Math.round(st.cond).toString());
+  set$('v-pond-amb', st.ambTemp.toFixed(1));
+  set$('v-pond-wind',st.windSpeed.toFixed(1));
+  set$('v-pond-rh',  Math.round(st.rh).toString());
+  set$('v-pond-hrt', st.hrt.toFixed(2));
+  set$('v-pond-sol', Math.round(st.solar).toString());
+  set$('v-pond-ot',  st.outTempTarget.toFixed(1));
+  set$('v-pond-dr',  Math.round(st.dischargeRate).toString());
+  set$('v-pond-bd',  Math.round(st.blowdownRate).toString());
+
+  renderDashAllSystems();
+  syncSpecialPages();
+
+  if (document.getElementById('page-performance')?.classList.contains('active')) {
+    updatePerfPage(s, st);
+  }
+}
+
+// ── Update performance page values in-place
+function updatePerfPage(s, st) {
+  const ot   = outTemp(st);
+  const edt  = epaDT(st);
+  const eff  = parseFloat(st.eff || s.eff || 90);
+  const tssr = tssRemoval(st);
+
+  // Alarm panel
+  const ap = document.getElementById('perf-alarm-panel');
+  if (ap) ap.innerHTML = buildAlarmPanel(s, st);
+
+  // KPI spans
+  set$('perf-kpi-eff',  eff.toFixed(1) + '%');
+  set$('perf-kpi-epa',  '+' + edt + '°C');
+  set$('perf-kpi-out',  ot.toFixed(1) + '°C');
+  set$('perf-kpi-tss',  tssr + '%');
+
+  // Bars
+  const effBar = document.getElementById('perf-bar-eff');
+  if (effBar) effBar.style.width = Math.min(eff, 100) + '%';
+  const tssBar = document.getElementById('perf-bar-tss');
+  if (tssBar) tssBar.style.width = Math.min(tssr, 100) + '%';
+
+  // Compliance cells
+  const epaValEl  = document.getElementById('comp-epa-val');
+  const epaChipEl = document.getElementById('comp-epa-chip');
+  const npdesEl   = document.getElementById('comp-npdes-val');
+  const tssValEl  = document.getElementById('comp-tss-val');
+  if (epaValEl) {
+    epaValEl.textContent = '+' + edt + '°C';
+    epaValEl.style.color = edt > T.epaDTMax ? 'var(--bad)' : edt > T.epaDTWarn ? 'var(--mid)' : 'var(--good)';
+  }
+  if (epaChipEl) {
+    const lbl = edt > T.epaDTMax ? 'EXCEED' : edt > T.epaDTWarn ? 'NEAR MAX' : 'PASS';
+    const cls = edt > T.epaDTMax ? 'c-bad'  : edt > T.epaDTWarn ? 'c-warn'   : 'c-ok';
+    epaChipEl.className = 'chip ' + cls;
+    epaChipEl.innerHTML = '<span class="cdot"></span>' + lbl;
+  }
+  if (npdesEl) {
+    npdesEl.textContent = ot.toFixed(1) + '°C';
+    npdesEl.style.color = ot <= 36 ? 'var(--good)' : 'var(--bad)';
+  }
+  if (tssValEl) {
+    tssValEl.textContent = tssr + '%';
+    tssValEl.style.color = tssr >= 85 ? 'var(--good)' : 'var(--bad)';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  COMPLIANCE ENGINE
+// ══════════════════════════════════════════════════════════════
+function checkCompliance(s, st) {
+  const a = [], w = [];
+  const pond = s.type === 'Cooling Pond';
+  const edt  = epaDT(st);
+
+  if (st.intemp > T.inletMax)   a.push({ p:'INLET TEMP',  m:'Inlet temp critically high — equipment damage risk',        v:st.intemp+'°C',     l:'>'+T.inletMax+'°C' });
+  else if (st.intemp > T.inletWarn) w.push({ p:'INLET TEMP',  m:'Inlet temp elevated — monitor closely',                 v:st.intemp+'°C',     l:'>'+T.inletWarn+'°C' });
+
+  if (edt > T.epaDTMax)         a.push({ p:'EPA §316(a)', m:'Thermal discharge exceeds EPA limit — immediate action',    v:'+'+edt+'°C',       l:'+'+T.epaDTMax+'°C' });
+  else if (edt > T.epaDTWarn)   w.push({ p:'EPA ΔT',      m:'Thermal discharge approaching EPA §316(a) limit',          v:'+'+edt+'°C',       l:'+'+T.epaDTMax+'°C' });
+
+  if (st.eff < T.effMin)        a.push({ p:'EFFICIENCY',  m:'Efficiency critically low — check fill media / fouling',    v:st.eff+'%',         l:'<'+T.effMin+'%' });
+  else if (st.eff < T.effWarn)  w.push({ p:'EFFICIENCY',  m:'Efficiency below target range',                             v:st.eff+'%',         l:'<'+T.effWarn+'%' });
+
+  if (st.tss > T.tssMax)        a.push({ p:'TSS',         m:'Suspended solids critically high — NPDES risk',            v:st.tss+' mg/L',     l:'>'+T.tssMax+' mg/L' });
+  else if (st.tss > T.tsswarn)  w.push({ p:'TSS',         m:'Suspended solids elevated — review pre-treatment',         v:st.tss+' mg/L',     l:'>'+T.tsswarn+' mg/L' });
+
+  if (st.doVal < T.doMin)       a.push({ p:'DO',          m:'DO critically low — aquatic life risk at discharge',        v:st.doVal+' mg/L',   l:'<'+T.doMin+' mg/L' });
+  else if (st.doVal < T.doWarn) w.push({ p:'DO',          m:'DO below recommended level',                               v:st.doVal+' mg/L',   l:'<'+T.doWarn+' mg/L' });
+
+  if (st.ph < T.phMin || st.ph > T.phMax)           a.push({ p:'pH', m:'pH outside safe range — check dosing system',  v:st.ph+' pH',        l:T.phMin+'–'+T.phMax });
+  else if (st.ph < T.phWarnLo || st.ph > T.phWarnHi) w.push({ p:'pH', m:'pH nearing boundary',                        v:st.ph+' pH',        l:T.phWarnLo+'–'+T.phWarnHi });
+
+  if (st.bypassValve > T.bypassWarn) w.push({ p:'BYPASS VALVE', m:'Bypass V-12 above recommended — increases heat load', v:st.bypassValve+'%', l:'>'+T.bypassWarn+'%' });
+  if (st.flow > T.flowMax)           w.push({ p:'FLOW RATE',    m:'Flow near max capacity — check pump pressure',        v:Math.round(st.flow).toLocaleString()+' L/min', l:'>'+T.flowMax.toLocaleString()+' L/min' });
+  if (pond && st.cond > T.condWarn)  w.push({ p:'CONDUCTIVITY', m:'Conductivity elevated — check TDS / blowdown rate',  v:st.cond+' µS/cm',   l:'>'+T.condWarn+' µS/cm' });
+
+  return { alarms:a, warnings:w };
+}
+
+function buildAlarmPanel(s, st) {
+  const { alarms, warnings } = checkCompliance(s, st);
+  if (!alarms.length && !warnings.length) {
+    return '<div style="background:rgba(57,255,20,.06);border:1px solid rgba(57,255,20,.2);border-left:3px solid var(--good);padding:10px 14px;font-family:\'Share Tech Mono\',monospace;font-size:.62rem;color:var(--good);letter-spacing:.5px;margin-bottom:8px;">✅ ALL PARAMETERS WITHIN SAFE OPERATING LIMITS</div>';
+  }
+  return alarms.map(a => `<div class="alarm-row"><div class="alarm-icon">🔴</div><div><div class="alarm-msg">${a.m}</div><div class="alarm-param">${a.p}: ${a.v} · LIMIT: ${a.l}</div></div></div>`).join('')
+       + warnings.map(w => `<div class="warn-row"><div class="warn-icon">🟡</div><div><div class="alarm-msg" style="color:var(--mid)">${w.m}</div><div class="alarm-param">${w.p}: ${w.v} · THRESHOLD: ${w.l}</div></div></div>`).join('');
+}
+
+function runCompliance(s, st) {
+  const { alarms, warnings } = checkCompliance(s, st);
+  const now = new Date().toTimeString().split(' ')[0];
+
+  // Status update
+  if (alarms.length > 0 && s.status === 'online') {
+    s.status = 'warning';
+    renderSysGrid();
+    renderSideFooter();
+  } else if (alarms.length === 0 && s.status === 'warning' && !STOPPED.has(s.id)) {
+    s.status = 'online';
+    renderSysGrid();
+    renderSideFooter();
+  }
+
+  // Push new alerts (deduplicated)
+  alarms.forEach(a => {
+    const aid = 'COMP-' + s.id + '-' + a.p;
+    if (!alertData.active.find(al => al.id === aid)) {
+      alertData.active.unshift({ id:aid, time:now, sev:'critical', msg:'['+s.id+'] '+a.m, sub:a.p+': '+a.v+' · LIMIT: '+a.l, selected:false, resolved:false });
+    } else {
+      // Update existing alert value
+      const al = alertData.active.find(al => al.id === aid);
+      if (al) al.sub = a.p + ': ' + a.v + ' · LIMIT: ' + a.l;
+    }
+  });
+  warnings.forEach(w => {
+    const wid = 'COMP-WARN-' + s.id + '-' + w.p;
+    if (!alertData.active.find(al => al.id === wid)) {
+      alertData.active.unshift({ id:wid, time:now, sev:'medium', msg:'['+s.id+'] '+w.m, sub:w.p+': '+w.v+' · THRESHOLD: '+w.l, selected:false, resolved:false });
+    }
+  });
+
+  // Auto-resolve cleared alerts
+  alertData.active = alertData.active.filter(al => {
+    if (!al.id.startsWith('COMP-')) return true;
+    const isWarn = al.id.startsWith('COMP-WARN-');
+    const param  = al.id.replace(isWarn ? 'COMP-WARN-'+s.id+'-' : 'COMP-'+s.id+'-', '');
+    if (isWarn) return warnings.some(w => w.p === param);
+    return alarms.some(a => a.p === param);
+  });
+
+  renderAlerts();
+  // Update notification badge
+  const nd = document.querySelector('.notif-dot');
+  if (nd) {
+    const cnt = alertData.active.length;
+    nd.textContent = cnt;
+    nd.style.display = cnt > 0 ? 'flex' : 'none';
+  }
+  const bnb = document.querySelector('#bn-alerts .bn-badge');
+  if (bnb) {
+    const cnt = alertData.active.length;
+    bnb.textContent = cnt;
+    bnb.style.display = cnt > 0 ? 'flex' : 'none';
+  }
+}
+
+function applyStateToSystem(s, st) {
+  s.intemp = parseFloat(st.intemp);
+  s.flow   = Math.round(st.flow);
+  s.load   = parseFloat(st.load);
+  s.eff    = parseFloat(st.eff || s.eff || 90);
+  s.ph     = parseFloat(st.ph);
+  s.tss    = Math.round(st.tss);
+  s.doVal  = parseFloat(st.doVal);
+  s.ps     = parseFloat(st.ps || 0);
+  s.cond   = Math.round(st.cond || 0);
+  s.ambTemp = parseFloat(st.ambTemp || 0);
+  s.coolantFlow = Math.round(st.coolantFlow || st.flow || 0);
+  s.bypassValve = Math.round(st.bypassValve || 0);
+  s.pressureDrop = parseFloat(st.pressureDrop || 0);
+  s.rh = Math.round(st.rh || 0);
+  s.windSpeed = parseFloat(st.windSpeed || 0);
+  s.hrt = parseFloat(st.hrt || 0);
+  s.solar = Math.round(st.solar || 0);
+  s.outTempTarget = parseFloat(st.outTempTarget || outTemp(st));
+  s.dischargeRate = Math.round(st.dischargeRate || st.flow || 0);
+  s.blowdownRate = Math.round(st.blowdownRate || 0);
+  s.outletTemp = outTemp(st);
+}
+
+function restartAllSystems() {
+  systems.forEach(s => {
+    STOPPED.delete(s.id);
+    initState(s);
+    const st = STATE[s.id];
+    applyStateToSystem(s, st);
+    runCompliance(s, st);
+    if (s.status === 'offline') s.status = 'online';
+  });
+  renderAll();
+  syncSpecialPages();
+  toast('▶ All systems restarted.');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SAVE
+// ══════════════════════════════════════════════════════════════
+function saveActiveSystem() {
+  const s = systems[activeSystemIdx];
+  if (!s) { toast('⚠ No active system.'); return; }
+  if (STOPPED.has(s.id)) { toast('⚠ System is stopped — restart before saving.'); return; }
+  initState(s);
+  const st = STATE[s.id];
+  if (!st) { toast('⚠ No state for this system.'); return; }
+  applyStateToSystem(s, st);
+  runCompliance(s, st);
+  renderAll();
+  syncSpecialPages();
+  toast('✅ ' + s.name + ' saved. All sections refreshed.');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STOP / RESTART ENGINE
+// ══════════════════════════════════════════════════════════════
+function openStopModal(idx) {
+  stopTargetIdx = (idx !== null && idx !== undefined) ? idx : activeSystemIdx;
+  const s = systems[stopTargetIdx];
+  if (!s) return;
+  const stopped = STOPPED.has(s.id);
+  document.getElementById('stop-modal-title').textContent = stopped ? '▶ Restart System' : '⛔ Stop System';
+  document.getElementById('stop-sys-display').textContent = s.name;
+  document.getElementById('stop-active-label').textContent = 'Selected: ' + s.name + ' (' + s.id + ')';
+  document.getElementById('stopModal').classList.add('open');
+}
+
+function closeStopModal() {
+  document.getElementById('stopModal').classList.remove('open');
+  stopTargetIdx = null;
+}
+
+function confirmStop() {
+  const typ = document.querySelector('input[name="stop-type"]:checked')?.value || 'active';
+  const targetIdx = stopTargetIdx !== null ? stopTargetIdx : activeSystemIdx;
+  closeStopModal();
+  if (typ === 'all') {
+    const anyRunning = systems.some(s => !STOPPED.has(s.id));
+    systems.forEach(s => {
+      if (anyRunning) { STOPPED.add(s.id); s.status = 'offline'; }
+      else {
+        STOPPED.delete(s.id);
+        initState(s);
+        runCompliance(s, STATE[s.id]);
+      }
+    });
+    renderAll();
+    syncSpecialPages();
+    toast(anyRunning ? '⛔ All systems stopped.' : '▶ All systems restarted.');
+    return;
+  }
+  const s = systems[targetIdx];
+  if (!s) return;
+  if (STOPPED.has(s.id)) {
+    STOPPED.delete(s.id);
+    initState(s);
+    runCompliance(s, STATE[s.id]);
+    toast('▶ ' + s.name + ' restarted.');
+  } else {
+    STOPPED.add(s.id);
+    s.status = 'offline';
+    toast('⛔ ' + s.name + ' stopped.');
+  }
+  renderAll();
+  syncSpecialPages();
+}
+
+function restartSystem(idx) {
+  const s = systems[idx !== undefined ? idx : activeSystemIdx];
+  if (!s) return;
+  STOPPED.delete(s.id);
+  initState(s);
+  runCompliance(s, STATE[s.id]);
+  renderAll();
+  syncSpecialPages();
+  toast('▶ ' + s.name + ' restarted.');
+}
+
+function stopBtnHTML(idx) {
+  const s = systems[idx !== undefined ? idx : activeSystemIdx];
+  if (!s) return '';
+  const stopped = STOPPED.has(s.id);
+  return '<button class="page-stop-btn' + (stopped ? ' stopped' : '') + '" onclick="openStopModal(' + systems.indexOf(s) + ')">' + (stopped ? '▶ Restart' : '⛔ Stop') + '</button>';
+}
+
+function stoppedBannerHTML(s) {
+  const i = systems.indexOf(s);
+  return '<div class="stopped-banner"><div style="flex:1"><div class="stopped-banner-txt">⛔ ' + s.name + ' IS STOPPED</div><div class="stopped-banner-sub">All controls are disabled. Press Restart to resume operation.</div></div><div class="stopped-badge">OFFLINE</div><button class="page-stop-btn stopped" style="flex-shrink:0" onclick="restartSystem(' + i + ')">▶ Restart</button></div>';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CLOCK
+// ══════════════════════════════════════════════════════════════
+function tick() {
+  const el = document.getElementById('clock');
+  if (el) el.textContent = new Date().toTimeString().split(' ')[0];
+}
+tick();
+setInterval(tick, 1000);
+
+// ══════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════════════
+const pageIds = ['dashboard','input','operating','performance','output','systems','reports','alerts','compliance','settings','account','pond','tower'];
+const bnMap   = { dashboard:'bn-dashboard', input:'bn-input', operating:'bn-input', performance:'bn-input', output:'bn-input', systems:'bn-systems', reports:'bn-alerts', alerts:'bn-alerts', compliance:'bn-more', settings:'bn-more', account:'bn-more', pond:'bn-more', tower:'bn-more' };
+
+function goTo(id) {
+  if (id === 'tower' && systems[activeSystemIdx]?.type !== 'Cooling Tower') {
+    const firstTower = systems.findIndex(s => s.type === 'Cooling Tower');
+    if (firstTower >= 0) activeSystemIdx = firstTower;
+  }
+  if (id === 'pond' && systems[activeSystemIdx]?.type !== 'Cooling Pond') {
+    const firstPond = systems.findIndex(s => s.type === 'Cooling Pond');
+    if (firstPond >= 0) activeSystemIdx = firstPond;
+  }
+  pageIds.forEach(p => { const el = document.getElementById('page-'+p); if (el) el.classList.remove('active'); });
+  document.querySelectorAll('.bn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sid-item').forEach(s => s.classList.remove('active'));
+  const pg = document.getElementById('page-'+id);
+  if (pg) { pg.classList.add('active'); const m = document.querySelector('.main'); if (m) m.scrollTop = 0; }
+  if (bnMap[id]) document.getElementById(bnMap[id])?.classList.add('active');
+  document.querySelectorAll('.sid-item').forEach(s => {
+    if (s.getAttribute('onclick')?.includes("'" + id + "'")) s.classList.add('active');
+  });
+  syncSpecialPages();
+  closeSidebar();
+}
+function navTo(id) { goTo(id); }
+
+// ══════════════════════════════════════════════════════════════
+//  SIDEBAR
+// ══════════════════════════════════════════════════════════════
+function toggleSidebar() { ['sidebar','overlay','menuBtn'].forEach(id => document.getElementById(id)?.classList.toggle('open')); }
+function closeSidebar()  { ['sidebar','overlay','menuBtn'].forEach(id => document.getElementById(id)?.classList.remove('open')); }
+
+// ══════════════════════════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════════════════════════
+let currentTheme = 'dark';
+function setTheme(theme) {
+  currentTheme = theme;
+  document.body.classList.toggle('light', theme === 'light');
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = theme === 'light' ? '☀️' : '🌙';
+  document.getElementById('pill-dark')?.classList.toggle('active', theme === 'dark');
+  document.getElementById('pill-light')?.classList.toggle('active', theme === 'light');
+  try { localStorage.setItem('ltpcs-theme', theme); } catch(e){}
+  toast(theme === 'light' ? '☀️ Light mode.' : '🌙 Dark mode.');
+}
+function toggleTheme() { setTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
+(function(){ try { const s = localStorage.getItem('ltpcs-theme'); if (s === 'light') setTheme('light'); } catch(e){} })();
+
+// ══════════════════════════════════════════════════════════════
+//  SWITCH SYSTEM
+// ══════════════════════════════════════════════════════════════
+function switchSystem(idx) {
+  if (idx < 0 || idx >= systems.length) return;
+  activeSystemIdx = idx;
+  renderAll();
+  toast('Switched to: ' + systems[idx].name);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RENDER ALL
+// ══════════════════════════════════════════════════════════════
+function renderAll() {
+  initAllStates();
+  renderTopbar();
+  renderDashAllSystems();
+  renderMgrSwitcher();
+  renderSysGrid();
+  renderSideFooter();
+  renderVariablePages();
+  renderTowerSwitcher();
+  const scl = document.getElementById('sys-count-label');
+  if (scl) scl.textContent = systems.length + ' MONITORING STATION' + (systems.length !== 1 ? 'S' : '');
+  const ssc = document.getElementById('sid-sys-count');
+  if (ssc) ssc.textContent = systems.length;
+  syncSpecialPages();
+}
+
+function renderTopbar() {
+  const s = systems[activeSystemIdx];
+  if (!s) return;
+  set$('tb-sys-name', s.id);
+  set$('tb-sys-id',   s.name.toUpperCase().substring(0, 22));
+  set$('dash-title',  'Overview Dashboard');
+  set$('dash-sub',    'ALL OPERATIONAL SYSTEMS · ' + systems.length + ' ACTIVE · LIVE');
+}
+
+// ── ACCENT
+function accentForType(type) {
+  if (type === 'Cooling Tower')        return '#00b4d8';
+  if (type === 'Cooling Pond')         return '#00c9a7';
+  if (type === 'Heat Exchanger')       return '#a855f7';
+  if (type === 'Wastewater Treatment') return '#00d4ff';
+  if (type === 'Power Plant Cooling')  return '#ff6b35';
+  return '#00d4ff';
+}
+function slCls(type) {
+  if (type === 'Cooling Pond')   return 'sl-pond';
+  if (type === 'Heat Exchanger') return 'sl-g';
+  return 'sl-b';
+}
+
+// ── DASHBOARD ALL-SYSTEMS
+function renderDashAllSystems() {
+  const container = document.getElementById('dash-all-systems');
+  const fk = document.getElementById('dash-fleet-kpis');
+  if (!container) return;
+
+  const total     = systems.length;
+  const online    = systems.filter(s => s.status === 'online').length;
+  const avgEff    = total ? (systems.reduce((a,s) => a + s.eff, 0) / total).toFixed(1) : 0;
+  const totalFlow = systems.reduce((a,s) => a + s.flow, 0);
+  const totalLoad = systems.reduce((a,s) => a + s.load, 0).toFixed(1);
+  const warns     = systems.filter(s => s.status === 'warning').length;
+
+  if (fk) {
+    fk.innerHTML = [
+      kpiCard('kc1','TOTAL SYSTEMS',    '#00b4d8', total+' <span class="kpi-unit">units</span>',           online+' online'),
+      kpiCard('kc3','AVG EFFICIENCY',   'var(--a3)',avgEff+'<span class="kpi-unit">%</span>',              'Fleet avg'),
+      kpiCard('kc2','TOTAL FLOW',       'var(--a2)',totalFlow.toLocaleString()+'<span class="kpi-unit">L/min</span>', 'Combined'),
+      kpiCard('kc4','TOTAL HEAT LOAD',  'var(--a4)',totalLoad+'<span class="kpi-unit">MW</span>',           'Active'),
+      kpiCard('kc5','WARNINGS',         'var(--a5)',warns+'<span class="kpi-unit"> sys</span>',             warns > 0 ? 'Needs attention' : 'All clear'),
+    ].join('');
+  }
+
+  if (!systems.length) {
+    container.innerHTML = '<div class="dash-empty"><div class="dash-empty-icon">🏭</div><div class="dash-empty-txt">NO SYSTEMS REGISTERED</div><div class="dash-empty-sub">Add a monitoring station to get started</div><button class="btn b-s" style="margin-top:12px" onclick="openAddModal()">＋ Add First System</button></div>';
+    return;
+  }
+
+  const groups = {};
+  systems.forEach((s,i) => { if (!groups[s.type]) groups[s.type] = []; groups[s.type].push({s,i}); });
+
+  const typeIcons = {'Cooling Tower':'🌊','Cooling Pond':'🏞️','Heat Exchanger':'🔄','Wastewater Treatment':'💧','Power Plant Cooling':'⚡','Industrial Discharge':'🏭'};
+  const pageMap   = {'Cooling Tower':'tower','Cooling Pond':'pond'};
+
+  let html = '';
+  for (const [type, entries] of Object.entries(groups)) {
+    const icon = typeIcons[type] || '⚙️';
+    const ac   = accentForType(type);
+    const dp   = pageMap[type];
+    html += '<div class="dash-section-lbl"><span>' + icon + ' ' + type.toUpperCase() + ' <span style="color:var(--muted);font-size:.52rem">(' + entries.length + ')</span></span><div style="display:flex;gap:6px">' +
+            (dp ? '<button class="dash-add-btn" onclick="goTo(\'' + dp + '\')">📊 Monitor ' + (type === 'Cooling Tower' ? 'Tower' : 'Pond') + ' →</button>' : '') +
+            '<button class="dash-add-btn" onclick="openAddModal()">＋ Add</button></div></div>';
+    html += '<div class="dash-systems-section">';
+    entries.forEach(({s, i}) => {
+      const sc  = statusConfig[s.status] || statusConfig.online;
+      const ot  = STATE[s.id] ? outTemp(STATE[s.id]).toFixed(1) : (s.intemp * 0.37).toFixed(1);
+      const act = i === activeSystemIdx;
+      html += '<div class="dash-sys-card' + (act ? ' active-dash' : '') + '" style="--card-accent:' + ac + '" onclick="switchSystem(' + i + ')">' +
+        '<div class="dash-sys-hd"><div>' +
+          '<div class="dash-sys-name" style="color:' + (act ? ac : 'var(--text)') + '">' + s.name + '</div>' +
+          '<div class="dash-sys-meta">' + s.id + ' · 📍 ' + s.loc + '</div>' +
+        '</div><div class="dash-sys-actions" onclick="event.stopPropagation()">' +
+          '<div class="dash-act-btn view" onclick="switchSystem(' + i + ');goTo(\'' + (dp||'input') + '\')" title="Monitor">📊</div>' +
+          '<div class="dash-act-btn edit" onclick="openEditModal(' + i + ')" title="Edit">✏️</div>' +
+          '<div class="dash-act-btn view" onclick="restartSystem(' + i + ')" title="Restart">↻</div>' +
+          '<div class="dash-act-btn del"  onclick="openDelModal(' + i + ')"  title="Remove">🗑</div>' +
+        '</div></div>' +
+        '<div class="dash-sys-kpis">' +
+          '<div class="dash-kpi"><div class="dash-kpi-lbl">INLET TEMP</div><div class="dash-kpi-val" style="color:' + ac + '">' + s.intemp.toFixed(1) + '°<span class="dash-kpi-unit">C</span></div></div>' +
+          '<div class="dash-kpi"><div class="dash-kpi-lbl">EFFICIENCY</div><div class="dash-kpi-val" style="color:var(--a3)">' + s.eff + '%</div></div>' +
+          '<div class="dash-kpi"><div class="dash-kpi-lbl">FLOW</div><div class="dash-kpi-val" style="color:var(--accent)">' + (s.flow >= 1000 ? (s.flow/1000).toFixed(1)+'k' : s.flow) + '<span class="dash-kpi-unit">L/m</span></div></div>' +
+          '<div class="dash-kpi"><div class="dash-kpi-lbl">HEAT LOAD</div><div class="dash-kpi-val" style="color:var(--a4)">' + s.load + '<span class="dash-kpi-unit">MW</span></div></div>' +
+          '<div class="dash-kpi"><div class="dash-kpi-lbl">OUTLET</div><div class="dash-kpi-val" style="color:var(--a4)">' + ot + '°<span class="dash-kpi-unit">C</span></div></div>' +
+          '<div class="dash-kpi"><div class="dash-kpi-lbl">STATUS</div><div class="dash-kpi-val" style="color:' + sc.color + ';font-size:.7rem;letter-spacing:.5px">' + sc.label + '</div></div>' +
+        '</div>' +
+        '<div class="dash-sys-footer"><div class="dash-sys-type-tag">' + icon + ' ' + s.type + '</div><span class="chip ' + sc.chip + '" style="font-size:.5rem"><span class="cdot"></span>' + sc.label + '</span></div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function kpiCard(cls, lbl, color, val, trend) {
+  return '<div class="kpi ' + cls + '"><div class="kpi-lbl">' + lbl + '</div><div class="kpi-val" style="color:' + color + '">' + val + '</div><div class="kpi-ch st">' + trend + '</div></div>';
+}
+
+// ── MANAGE SYSTEMS GRID
+function renderMgrSwitcher() {
+  const el = document.getElementById('mgr-switcher');
+  if (el) el.innerHTML = systems.map((s,i) => sysTabHTML(s, i, 'switchSystem')).join('') + addTabHTML();
+}
+
+function renderSysGrid() {
+  const grid = document.getElementById('sys-grid');
+  if (!grid) return;
+  if (!systems.length) { grid.innerHTML = ''; return; }
+  grid.innerHTML = systems.map((s,i) => {
+    const sc  = statusConfig[s.status] || statusConfig.online;
+    const act = i === activeSystemIdx;
+    return '<div class="sys-card' + (act?' active-sys':'') + '" onclick="switchSystem(' + i + ')">' +
+      '<div class="sys-card-top"><div class="sys-card-info">' +
+        '<div class="sys-card-name">' + s.name + (act ? ' <span style="font-size:.55rem;color:var(--accent);font-family:Share Tech Mono,monospace;border:1px solid rgba(0,212,255,.3);padding:1px 5px;border-radius:2px">ACTIVE</span>' : '') + '</div>' +
+        '<div class="sys-card-id">' + s.id + ' · ' + s.type + '</div>' +
+        '<div class="sys-card-loc">📍 ' + s.loc + '</div>' +
+      '</div><div class="sys-card-actions" onclick="event.stopPropagation()">' +
+        '<div class="sc-btn edit" onclick="openEditModal(' + i + ')">✏️</div>' +
+        '<div class="sc-btn edit" onclick="restartSystem(' + i + ')" title="Restart">↻</div>' +
+        '<div class="sc-btn del"  onclick="openDelModal(' + i + ')">🗑</div>' +
+      '</div></div>' +
+      '<div class="sys-card-stats">' +
+        '<div class="sc-stat"><div class="sc-stat-lbl">INLET TEMP</div><div class="sc-stat-val" style="color:#00b4d8">' + s.intemp + '°C</div></div>' +
+        '<div class="sc-stat"><div class="sc-stat-lbl">EFFICIENCY</div><div class="sc-stat-val" style="color:var(--a3)">' + s.eff + '%</div></div>' +
+        '<div class="sc-stat"><div class="sc-stat-lbl">FLOW</div><div class="sc-stat-val" style="color:var(--accent)">' + s.flow.toLocaleString() + '</div></div>' +
+      '</div>' +
+      '<div class="sys-card-foot"><span class="chip ' + sc.chip + '"><span class="cdot"></span>' + sc.label + '</span>' +
+        (s.notes ? '<span style="font-family:\'Share Tech Mono\',monospace;font-size:.58rem;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + s.notes + '</span>' : '') +
+      '</div></div>';
+  }).join('');
+}
+
+function renderSideFooter() {
+  const s  = systems[activeSystemIdx];
+  if (!s) return;
+  set$('sid-foot-title', s.id + ' — STATUS');
+  const sc   = statusConfig[s.status] || statusConfig.online;
+  const pond = s.type === 'Cooling Pond';
+  const rows = pond
+    ? [['INLET SENSOR','ok'],['MID-POND SENSOR','ok'],['OUTLET SENSOR','ok'],['AERATOR AER-01','ok'],['OVERFLOW GATE','ok']]
+    : [['PUMP P-01','ok'],['PUMP P-02','ok'],['COOLING TOWER','ok'],['HX UNIT HX-1','wn'],['BYPASS VALVE','er']];
+  const el = document.getElementById('sid-foot-status');
+  if (el) el.innerHTML = rows.map(([nm,cls]) => '<div class="sys-row"><span class="sys-nm">' + nm + '</span><span class="sdot ' + cls + '">●</span></div>').join('') +
+    '<div class="sys-row"><span class="sys-nm">SYS STATUS</span><span class="sdot" style="color:' + sc.color + '">●</span></div>';
+}
+
+// ── TOWER SWITCHER
+function renderTowerSwitcher() {
+  const el = document.getElementById('tower-switcher');
+  if (!el) return;
+  const towers = systems.filter(s => s.type === 'Cooling Tower');
+  if (!towers.length) {
+    el.innerHTML = '<div style="font-family:Share Tech Mono,monospace;font-size:.62rem;color:var(--muted);padding:8px 0">No Cooling Tower systems registered. <span style="color:var(--accent);cursor:pointer" onclick="openAddModal()">Add one →</span></div>';
+    return;
+  }
+  el.innerHTML = towers.map(s => {
+    const i  = systems.indexOf(s);
+    const sc = statusConfig[s.status] || statusConfig.online;
+    const act = i === activeSystemIdx;
+    return '<div class="sys-tab' + (act?' active':'') + '" onclick="switchSystem(' + i + ')" style="' + (act?'border-color:#00b4d8':'') + '">' +
+      '<div class="sys-tab-name" style="' + (act?'color:#00b4d8':'') + '">' + s.name + '</div>' +
+      '<div class="sys-tab-id">' + s.id + '</div>' +
+      '<div class="sys-tab-status"><div class="sys-tab-dot" style="background:' + sc.color + ';color:' + sc.color + '"></div><span class="sys-tab-slbl" style="color:' + sc.color + '">' + sc.label + '</span></div>' +
+    '</div>';
+  }).join('') + '<div class="sys-add-btn" onclick="openAddModal()">＋</div>';
+
+  // Update CT page banner
+  const active = towers.find(s => systems.indexOf(s) === activeSystemIdx) || towers[0];
+  if (active) {
+    set$('ct-banner-name', active.name);
+    set$('ct-banner-sub',  active.id + ' · ' + active.type + ' · ' + active.loc);
+    set$('ct-page-sub',    active.id + ' · ' + active.loc.toUpperCase() + ' · LIVE');
+  }
+}
+
+function updateRangeControl(id, val, min, max, dec) {
+  const el = document.querySelector('input[type="range"][oninput*="\'' + id + '\'"]');
+  if (!el || Number.isNaN(parseFloat(val))) return;
+  el.value = val;
+  const pct = Math.max(0, Math.min(100, ((parseFloat(val) - min) / (max - min)) * 100));
+  el.style.setProperty('--p', pct.toFixed(1) + '%');
+}
+
+function updateStatusChips(containerId, status) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  const chip = wrap.querySelector('.chip');
+  if (!chip) return;
+  const sc = statusConfig[status] || statusConfig.online;
+  chip.className = 'chip ' + sc.chip;
+  chip.innerHTML = '<span class="cdot"></span>' + sc.label;
+}
+
+function syncTowerPage() {
+  const s = systems[activeSystemIdx];
+  if (!s || s.type !== 'Cooling Tower') return;
+  initState(s);
+  const st = STATE[s.id];
+  const ot = outTemp(st);
+  const dt = deltaT(st);
+  const alarms = checkCompliance(s, st);
+  set$('ct-page-sub', s.id + ' · ' + s.loc.toUpperCase() + ' · LIVE MONITORING');
+  set$('ct-banner-name', s.name);
+  set$('ct-banner-sub', s.id + ' · ' + s.type + ' · ' + s.loc);
+  const stopBtn = document.getElementById('tower-stop-btn');
+  if (stopBtn) {
+    const stopped = STOPPED.has(s.id);
+    stopBtn.textContent = stopped ? '▶ Restart' : '⛔ Stop';
+    stopBtn.classList.toggle('stopped', stopped);
+    stopBtn.setAttribute('onclick', stopped ? 'restartSystem(' + activeSystemIdx + ')' : 'openStopModal(' + activeSystemIdx + ')');
+  }
+  const ap = document.getElementById('tower-alert-panel');
+  if (ap) ap.innerHTML = buildAlarmPanel(s, st);
+  set$('ct-kpi-it', st.intemp.toFixed(1));
+  set$('ct-kpi-flow', Math.round(st.flow).toLocaleString());
+  set$('ct-kpi-eff', parseFloat(st.eff || s.eff || 0).toFixed(1));
+  set$('ct-kpi-out', ot.toFixed(1));
+  set$('ct-kpi-dt', dt.toFixed(1));
+  set$('ct-kpi-energy', Math.max(1, Math.round(st.load * 100)).toString());
+  set$('ct-kpi-out-status', ot > 36 ? '▲ Non-compliant' : '▼ Compliant');
+  set$('ct-kpi-dt-status', dt > 50 ? '▲ High' : dt > 30 ? '▲ Elevated' : '— Normal');
+  updateRangeControl('ct-it', st.intemp, 20, 120);
+  updateRangeControl('ct-fl', st.flow, 500, 10000);
+  updateRangeControl('ct-hl', st.load, 0.1, 10);
+  updateRangeControl('ct-ph', st.ph, 2, 12);
+  updateRangeControl('ct-ts', st.tss, 0, 500);
+  updateRangeControl('ct-do', st.doVal, 0, 12);
+  updateRangeControl('ct-ps', st.ps, 0.1, 10);
+  updateRangeControl('ct-at', st.ambTemp, 15, 45);
+  updateRangeControl('ct-cf', st.coolantFlow, 500, 10000);
+  updateRangeControl('ct-bv', st.bypassValve, 0, 100);
+  updateRangeControl('ct-pd', st.pressureDrop, 0.1, 5);
+  updateRangeControl('ct-rh', st.rh, 10, 100);
+  updateRangeControl('ct-ot', st.outTempTarget, 15, 45);
+  updateRangeControl('ct-dr', st.dischargeRate, 500, 10000);
+  updateRangeControl('ct-bd', st.blowdownRate, 0, 200);
+}
+
+function syncPondPage() {
+  const s = systems[activeSystemIdx];
+  if (!s || s.type !== 'Cooling Pond') return;
+  initState(s);
+  const st = STATE[s.id];
+  const ot = outTemp(st);
+  const evap = Math.max(1, ((st.windSpeed || 0) * 2.2 + (st.solar || 0) / 120).toFixed(1));
+  const pondVol = Math.round((st.dischargeRate || st.flow || 0) * (st.hrt || 1.5));
+  const stopBtn = document.getElementById('pond-stop-btn');
+  if (stopBtn) {
+    const stopped = STOPPED.has(s.id);
+    stopBtn.textContent = stopped ? '▶ Restart' : '⛔ Stop';
+    stopBtn.classList.toggle('stopped', stopped);
+    stopBtn.setAttribute('onclick', stopped ? 'restartSystem(' + activeSystemIdx + ')' : 'openStopModal(' + activeSystemIdx + ')');
+  }
+  const ap = document.getElementById('pond-alert-panel');
+  if (ap) ap.innerHTML = buildAlarmPanel(s, st);
+  set$('pond-kpi-it', st.intemp.toFixed(1));
+  set$('pond-kpi-flow', Math.round(st.flow).toLocaleString());
+  set$('pond-kpi-eff', parseFloat(st.eff || s.eff || 0).toFixed(1));
+  set$('pond-kpi-out', ot.toFixed(1));
+  set$('pond-kpi-vol', pondVol.toLocaleString());
+  set$('pond-kpi-evap', String(evap));
+  set$('pond-kpi-out-status', ot > 36 ? '▲ Non-compliant' : '— Compliant');
+  set$('pond-kpi-evap-status', evap > 18 ? '▲ High' : '— Normal');
+  updateRangeControl('v-pond-it', st.intemp, 20, 120);
+  updateRangeControl('v-pond-fl', st.flow, 500, 5000);
+  updateRangeControl('v-pond-ph', st.ph, 2, 12);
+  updateRangeControl('v-pond-ts', st.tss, 0, 500);
+  updateRangeControl('v-pond-do', st.doVal, 0, 12);
+  updateRangeControl('v-pond-cond', st.cond, 50, 2000);
+  updateRangeControl('v-pond-amb', st.ambTemp, 15, 45);
+  updateRangeControl('v-pond-wind', st.windSpeed, 0, 15);
+  updateRangeControl('v-pond-rh', st.rh, 10, 100);
+  updateRangeControl('v-pond-hrt', st.hrt, 0.5, 5);
+  updateRangeControl('v-pond-sol', st.solar, 0, 1200);
+  updateRangeControl('v-pond-ot', st.outTempTarget, 15, 40);
+  updateRangeControl('v-pond-dr', st.dischargeRate, 500, 6000);
+  updateRangeControl('v-pond-bd', st.blowdownRate, 0, 300);
+}
+
+function syncSpecialPages() {
+  syncTowerPage();
+  syncPondPage();
+}
+
+function sysTabHTML(s, i, fn) {
+  const sc = statusConfig[s.status] || statusConfig.online;
+  return '<div class="sys-tab' + (i===activeSystemIdx?' active':'') + '" onclick="' + fn + '(' + i + ')">' +
+    '<div class="sys-tab-name">' + s.name + '</div>' +
+    '<div class="sys-tab-id">' + s.id + '</div>' +
+    '<div class="sys-tab-status"><div class="sys-tab-dot" style="background:' + sc.color + ';color:' + sc.color + '"></div><span class="sys-tab-slbl" style="color:' + sc.color + '">' + sc.label + '</span></div>' +
+  '</div>';
+}
+function addTabHTML() { return '<div class="sys-add-btn" onclick="openAddModal()">＋</div>'; }
+
+// ══════════════════════════════════════════════════════════════
+//  VARIABLE PAGES (rendered into content divs)
+// ══════════════════════════════════════════════════════════════
+function sliderRow(lbl, id, val, min, max, step, unit, cls, color) {
+  const pct = Math.max(0, Math.min(100, Math.round((parseFloat(val) - min) / (max - min) * 100)));
+  const dec = decFor(step);
+  const dv  = parseFloat(val).toFixed(dec);
+  return '<div class="ctrl"><div class="ctrl-top"><div class="cl">' + lbl + '</div>' +
+    '<div class="cv-wrap"><span class="cv" style="color:' + color + '" id="' + id + '">' + dv + '</span><span class="cu">' + unit + '</span></div></div>' +
+    '<input type="range" class="' + cls + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '" style="--p:' + pct + '%" oninput="sv(\'' + id + '\',this,' + min + ',' + max + ',' + dec + ')"></div>';
+}
+function toggleRow(lbl, sub, on) {
+  return '<div class="trow"><div><div class="t-sub">' + lbl + '</div>' + (sub ? '<div class="t-lbl">' + sub + '</div>' : '') + '</div><div class="toggle' + (on?' on':'') + '" onclick="tog(this)"></div></div>';
+}
+function sectionCard(color, title, body) {
+  return '<div class="card" style="border-top:2px solid ' + color + '"><div class="ct" style="color:' + color + '">' + title + '</div>' + body + '</div>';
+}
+function barRow(lbl, pct, color, val, unit) {
+  return '<div class="ctrl"><div class="ctrl-top"><div class="cl">' + lbl + '</div><div class="cv-wrap"><span class="cv" style="color:' + color + '">' + val + '</span><span class="cu">' + unit + '</span></div></div><div class="bar-bg"><div class="bar" style="width:' + Math.min(pct,100) + '%;background:' + color + '"></div></div></div>';
+}
+
+function renderVariablePages() {
+  const s = systems[activeSystemIdx];
+  if (!s) return;
+  initState(s);
+  const st      = STATE[s.id];
+  const stopped = STOPPED.has(s.id);
+  const ac      = accentForType(s.type);
+  const sl      = slCls(s.type);
+  const pond    = s.type === 'Cooling Pond';
+  const typeTag = pond ? '🏞️' : s.type === 'Cooling Tower' ? '🌊' : '⚙️';
+
+  // Labels
+  set$('inp-sys-label',  typeTag + ' ' + s.name + ' · ' + s.type.toUpperCase() + ' · INFLUENT');
+  set$('op-sys-label',   typeTag + ' ' + s.name + ' · OPERATING');
+  set$('perf-sys-label', typeTag + ' ' + s.name + ' · PERFORMANCE');
+  set$('out-sys-label',  typeTag + ' ' + s.name + ' · OUTPUT');
+
+  // Stop button on input page
+  const sb = document.getElementById('inp-stop-btn');
+  if (sb) sb.innerHTML = stopBtnHTML(activeSystemIdx);
+
+  const banner  = stopped ? stoppedBannerHTML(s) : '';
+  const disable = stopped ? ' style="pointer-events:none;opacity:.5"' : '';
+
+  // ── Build switcher HTML for all variable pages
+  const switcherHTML = systems.map((sys,i) => {
+    const sc2 = statusConfig[sys.status] || statusConfig.online;
+    const a2  = accentForType(sys.type);
+    const act = i === activeSystemIdx;
+    return '<div class="sys-tab' + (act?' active':'') + '" onclick="switchSystem(' + i + ')" style="' + (act?'border-color:'+a2:'') + '">' +
+      '<div class="sys-tab-name" style="' + (act?'color:'+a2:'') + '">' + sys.name + '</div>' +
+      '<div class="sys-tab-id">' + sys.id + ' · ' + sys.type + '</div>' +
+      '<div class="sys-tab-status"><div class="sys-tab-dot" style="background:' + sc2.color + ';color:' + sc2.color + '"></div><span class="sys-tab-slbl" style="color:' + sc2.color + '">' + sc2.label + '</span></div>' +
+    '</div>';
+  }).join('') + addTabHTML();
+
+  // ── INPUT
+  let inputHTML = '';
+  if (pond) {
+    inputHTML = sectionCard(ac, 'Water Quality Inputs',
+      sliderRow('INFLOW TEMPERATURE',     'dv-it',  st.intemp,      20,   90,    0.5, '°C',     sl, ac) +
+      sliderRow('INFLOW RATE',            'dv-fl',  st.flow,        500,  6000,  10,  'L/min',  sl, ac) +
+      sliderRow('INFLOW pH',              'dv-ph',  st.ph,          5,    10,    0.1, 'pH',     sl, ac) +
+      sliderRow('SUSPENDED SOLIDS (TSS)', 'dv-ts',  st.tss,         0,    300,   1,   'mg/L',   sl, ac) +
+      sliderRow('DISSOLVED OXYGEN (DO)',  'dv-do',  st.doVal,       0,    14,    0.1, 'mg/L',   sl, ac) +
+      sliderRow('CONDUCTIVITY',           'dv-cond',st.cond,        50,   1000,  5,   'µS/cm',  sl, ac) +
+      toggleRow('Pre-Treatment Screen','Inlet mesh filter', true) +
+      toggleRow('Chemical Dosing (Auto)', '', true)
+    );
+  } else {
+    inputHTML = sectionCard(ac, 'Influent Type & Phase — ' + s.name,
+      '<div class="ctrl"><div class="cl">PRIMARY PHASE</div><select class="ctrl-select" style="margin-top:4px"><option>LIQUID — Industrial Wastewater</option><option>GAS — Thermal Off-Gas</option></select></div>' +
+      sliderRow('PARTICLE / DROPLET SIZE', 'dv-ps',  st.ps,     0.1,  10,    0.1, 'µm',    sl, ac) +
+      sliderRow('VOLUMETRIC FLOW RATE',    'dv-fl',  st.flow,   500,  s.type==='Cooling Tower'?10000:5000, 10, 'L/min', sl, ac) +
+      sliderRow('INLET TEMPERATURE',       'dv-it',  st.intemp, 20,   120,   0.5, '°C',    sl, ac) +
+      sliderRow('MASS HEAT LOAD',          'dv-hl',  st.load,   0.1,  10,    0.1, 'MW',    sl, ac) +
+      sliderRow('INFLUENT pH',             'dv-ph',  st.ph,     2,    12,    0.1, 'pH',    sl, ac) +
+      sliderRow('SUSPENDED SOLIDS (TSS)',  'dv-ts',  st.tss,    0,    500,   1,   'mg/L',  sl, ac) +
+      toggleRow('Pre-Screening', 'Mesh filter active', true) +
+      toggleRow('Chemical Dosing (Auto PID)', '', true)
+    );
+  }
+
+  // ── OPERATING
+  const dT    = deltaT(st).toFixed(1);
+  const dtChip = parseFloat(dT) > 50 ? 'c-bad' : parseFloat(dT) > 30 ? 'c-warn' : 'c-ok';
+  let opHTML = '';
+  if (pond) {
+    opHTML = sectionCard(ac, 'Meteorological & Process Conditions',
+      sliderRow('AMBIENT AIR TEMP',         'dv-amb',  st.ambTemp,   15,   45,    0.5, '°C',    sl, ac) +
+      sliderRow('WIND SPEED',               'dv-wind', st.windSpeed, 0,    15,    0.1, 'm/s',   sl, ac) +
+      sliderRow('RELATIVE HUMIDITY',        'dv-rh',   st.rh,        10,   100,   1,   '%',     sl, ac) +
+      sliderRow('HYDRAULIC RETENTION TIME', 'dv-hrt',  st.hrt,       0.5,  5,     0.01,'days',  sl, ac) +
+      sliderRow('SOLAR RADIATION',          'dv-sol',  st.solar,     0,    1200,  5,   'W/m²',  sl, ac) +
+      '<div class="ctrl"><div class="cl">POND MIXING MODE</div><select class="ctrl-select" style="margin-top:4px"><option>Natural Convection</option><option>Mechanical Aerator</option><option>Surface Spray</option></select></div>' +
+      toggleRow('Mechanical Aerator (AER-01)', 'Boosts surface evaporation', true) +
+      toggleRow('Surface Spray Nozzles', 'Increases evaporative cooling area', false) +
+      toggleRow('Auto-Blowdown', 'TDS concentration control', true) +
+      toggleRow('Algae Dosing (Auto)', 'Biological control active', true)
+    );
+  } else {
+    opHTML = sectionCard(ac, 'Thermal & Cooling — ' + s.name,
+      '<div class="srow"><div class="slbl">THERMAL DIFFERENTIAL ΔT</div><div><div class="sval" style="color:' + ac + '">+' + dT + '°C</div><span class="chip ' + dtChip + '" style="margin-top:2px"><span class="cdot"></span>' + (parseFloat(dT)>50?'CRITICAL':parseFloat(dT)>30?'ELEVATED':'NORMAL') + '</span></div></div>' +
+      sliderRow('AMBIENT WATER TEMP',   'dv-at', st.ambTemp,     15,  45,    0.1, '°C',     sl, ac) +
+      sliderRow('COOLANT FLOW RATE',    'dv-cf', st.coolantFlow, 500, 10000, 10,  'L/min',  sl, ac) +
+      sliderRow('BYPASS VALVE V-12',    'dv-bv', st.bypassValve, 0,   100,   1,   '% open', sl, ac) +
+      sliderRow('PRESSURE DROP',        'dv-pd', st.pressureDrop,0.1, 5,     0.1, 'bar',    sl, ac) +
+      sliderRow('RELATIVE HUMIDITY',    'dv-rh', st.rh,          10,  100,   1,   '%',      sl, ac) +
+      '<div class="ctrl"><div class="cl">COOLING MODE</div><select class="ctrl-select" style="margin-top:4px"><option>Evaporative</option><option>Mechanical Chiller</option><option>Air-Cooled HX</option></select></div>' +
+      toggleRow('Auto-Blowdown', 'Purges concentrated dissolved solids', true) +
+      toggleRow('Heat Recovery Mode', 'Waste heat reuse active', true) +
+      toggleRow('Emergency Vent', '', false)
+    );
+  }
+
+  // ── PERFORMANCE
+  const ot   = outTemp(st);
+  const edt  = epaDT(st);
+  const eff  = parseFloat(st.eff || s.eff || 90);
+  const tssr = tssRemoval(st);
+  const epaColor = edt > T.epaDTMax ? 'var(--bad)' : edt > T.epaDTWarn ? 'var(--mid)' : 'var(--good)';
+  const epaChip  = edt > T.epaDTMax ? 'c-bad'  : edt > T.epaDTWarn ? 'c-warn' : 'c-ok';
+  const epaLbl   = edt > T.epaDTMax ? 'EXCEED' : edt > T.epaDTWarn ? 'NEAR MAX' : 'PASS';
+  const npdesOk  = ot <= 36;
+  const tssOk    = tssr >= 85;
+
+  let kpis = '';
+  if (pond) {
+    kpis = '<div class="kpi kc3" style="border-bottom:2px solid '+ac+'"><div class="kpi-lbl">SURFACE TEMP</div><div class="kpi-val" style="color:'+ac+';font-size:1.3rem" id="perf-kpi-1">'+st.intemp.toFixed(1)+'<span class="kpi-unit">°C</span></div></div>' +
+           '<div class="kpi kc3" style="border-bottom:2px solid var(--a4)"><div class="kpi-lbl">OUTLET TEMP</div><div class="kpi-val" style="color:var(--a4);font-size:1.3rem" id="perf-kpi-out">'+ot.toFixed(1)+'<span class="kpi-unit">°C</span></div></div>' +
+           '<div class="kpi kc3" style="border-bottom:2px solid var(--a3)"><div class="kpi-lbl">DISSIP. EFF.</div><div class="kpi-val" style="color:var(--a3);font-size:1.3rem" id="perf-kpi-eff">'+eff.toFixed(1)+'<span class="kpi-unit">%</span></div></div>' +
+           '<div class="kpi kc3" style="border-bottom:2px solid var(--a2)"><div class="kpi-lbl">HEAT REJECTED</div><div class="kpi-val" style="color:var(--a2);font-size:1.3rem">'+st.load.toFixed(1)+'<span class="kpi-unit">MW</span></div></div>';
+  } else {
+    kpis = '<div class="kpi kc3" style="border-bottom:2px solid var(--a3)"><div class="kpi-lbl">COLLECTION EFF.</div><div class="kpi-val" style="color:var(--a3);font-size:1.3rem" id="perf-kpi-eff">'+eff.toFixed(1)+'<span class="kpi-unit">%</span></div></div>' +
+           '<div class="kpi kc3" style="border-bottom:2px solid var(--a3)"><div class="kpi-lbl">HX EFFECTIVENESS</div><div class="kpi-val" style="color:var(--a3);font-size:1.3rem">88.4<span class="kpi-unit">%</span></div></div>' +
+           '<div class="kpi kc3" style="border-bottom:2px solid var(--a5)"><div class="kpi-lbl">ENERGY USE</div><div class="kpi-val" style="color:var(--a5);font-size:1.3rem">312<span class="kpi-unit">kWh</span></div></div>' +
+           '<div class="kpi kc3" style="border-bottom:2px solid '+(edt>T.epaDTWarn?'var(--mid)':'var(--a3)')+'"><div class="kpi-lbl">ΔT DISCHARGE</div><div class="kpi-val" style="color:'+(edt>T.epaDTWarn?'var(--mid)':'var(--a3)')+';font-size:1.3rem" id="perf-kpi-epa">+'+edt+'<span class="kpi-unit">°C</span></div></div>';
+  }
+
+  const compRows = [
+    '<tr><td>EPA §316(a) ΔT</td><td class="td-m">≤+3.0°C</td><td class="td-n" id="comp-epa-val" style="color:'+epaColor+'">+'+edt+'°C</td><td><span class="chip '+epaChip+'" id="comp-epa-chip"><span class="cdot"></span>'+epaLbl+'</span></td></tr>',
+    '<tr><td>NPDES Outlet Temp</td><td class="td-m">≤36°C</td><td class="td-n" id="comp-npdes-val" style="color:'+(npdesOk?'var(--good)':'var(--bad)')+'">'+ot.toFixed(1)+'°C</td><td><span class="chip '+(npdesOk?'c-ok':'c-bad')+'"><span class="cdot"></span>'+(npdesOk?'PASS':'EXCEED')+'</span></td></tr>',
+    '<tr><td>Clean Water Act TSS</td><td class="td-m">≥85%</td><td class="td-n" id="comp-tss-val" style="color:'+(tssOk?'var(--good)':'var(--bad)')+'">'+tssr+'%</td><td><span class="chip '+(tssOk?'c-ok':'c-bad')+'"><span class="cdot"></span>'+(tssOk?'PASS':'FAIL')+'</span></td></tr>',
+    pond ? '<tr><td>Min. DO</td><td class="td-m">≥5 mg/L</td><td class="td-n" style="color:'+(st.doVal>=T.doMin?'var(--good)':'var(--bad)')+'">'+st.doVal.toFixed(1)+' mg/L</td><td><span class="chip '+(st.doVal>=T.doMin?'c-ok':'c-bad')+'"><span class="cdot"></span>'+(st.doVal>=T.doMin?'PASS':'FAIL')+'</span></td></tr>' : '',
+  ].join('');
+
+  const perfHTML =
+    '<div id="perf-alarm-panel">' + buildAlarmPanel(s, st) + '</div>' +
+    '<div class="kpi-scroll" style="margin-bottom:10px">' + kpis + '</div>' +
+    sectionCard(ac, 'Efficiency Metrics',
+      '<div class="ctrl"><div class="ctrl-top"><div class="cl">COLLECTION EFFICIENCY</div><div class="cv-wrap"><span class="cv" style="color:'+ac+'" id="perf-bar-eff-val">'+eff.toFixed(1)+'</span><span class="cu">%</span></div></div><div class="bar-bg"><div class="bar" id="perf-bar-eff" style="width:'+Math.min(eff,100)+'%;background:'+ac+'"></div></div></div>' +
+      '<div class="ctrl"><div class="ctrl-top"><div class="cl">TSS REMOVAL</div><div class="cv-wrap"><span class="cv" style="color:var(--a3)" id="perf-bar-tss-val">'+tssr+'</span><span class="cu">%</span></div></div><div class="bar-bg"><div class="bar" id="perf-bar-tss" style="width:'+Math.min(tssr,100)+'%;background:var(--a3)"></div></div></div>' +
+      (pond ? '' : '<div class="ctrl"><div class="ctrl-top"><div class="cl">HX EFFECTIVENESS</div><div class="cv-wrap"><span class="cv" style="color:var(--a3)">88.4</span><span class="cu">%</span></div></div><div class="bar-bg"><div class="bar" style="width:88.4%;background:var(--a3)"></div></div></div>')
+    ) +
+    sectionCard(ac, 'Regulatory Compliance',
+      '<div class="tbl-wrap"><table><thead><tr><th>REGULATION</th><th>LIMIT</th><th>CURRENT</th><th>STATUS</th></tr></thead><tbody>' + compRows + '</tbody></table></div>'
+    );
+
+  // ── OUTPUT
+  let outHTML = '';
+  if (pond) {
+    outHTML = sectionCard(ac, 'Pond Output Control — ' + s.name,
+      sliderRow('TARGET OUTLET TEMP',      'dv-ot',  st.outTempTarget,  15,  40,  0.5, '°C',    sl, ac) +
+      sliderRow('DISCHARGE RATE',          'dv-dr',  st.dischargeRate,  500, 6000,10,  'L/min', sl, ac) +
+      sliderRow('BLOWDOWN / MAKEUP RATE',  'dv-bd',  st.blowdownRate,   0,   300, 1,   'L/min', sl, ac) +
+      '<div class="ctrl"><div class="cl">DISCHARGE DESTINATION</div><select class="ctrl-select" style="margin-top:4px"><option>Receiving River — R-07</option><option>Secondary Pond CP-2</option><option>Irrigation Reuse</option></select></div>' +
+      '<div class="srow"><div class="slbl">OUTPUT pH</div><div><div class="sval" style="color:'+ac+'">7.0</div><span class="chip c-ok"><span class="cdot"></span>NEUTRAL</span></div></div>' +
+      '<div class="srow"><div class="slbl">OUTLET DO</div><div><div class="sval" style="color:'+ac+'">'+st.doVal.toFixed(1)+' mg/L</div><span class="chip c-ok"><span class="cdot"></span>OK</span></div></div>' +
+      toggleRow('Auto pH Correction','',true) +
+      toggleRow('Overflow Gate OG-01','Auto-opens at 95% capacity',true) +
+      toggleRow('Emergency Drain Valve','',false)
+    );
+  } else {
+    outHTML = sectionCard(ac, 'Treated Effluent — ' + s.name,
+      sliderRow('OUTPUT TEMP TARGET',  'dv-ot',  st.outTempTarget,  15,  45,  0.5, '°C',   sl, ac) +
+      sliderRow('DISCHARGE RATE',      'dv-dr',  st.dischargeRate,  500, 5000,10,  'L/min',sl, ac) +
+      sliderRow('BLOWDOWN RATE',       'dv-bd',  st.blowdownRate,   0,   200, 1,   'L/min',sl, ac) +
+      '<div class="ctrl"><div class="cl">DISCHARGE DESTINATION</div><select class="ctrl-select" style="margin-top:4px"><option>Receiving River — R-07</option><option>Holding Pond A</option><option>Municipal Drain</option></select></div>' +
+      '<div class="srow"><div class="slbl">OUTPUT pH</div><div><div class="sval" style="color:'+ac+'">7.0</div><span class="chip c-ok"><span class="cdot"></span>NEUTRAL</span></div></div>' +
+      '<div class="srow"><div class="slbl">DO OUTPUT</div><div><div class="sval" style="color:'+ac+'">'+st.doVal.toFixed(1)+' mg/L</div><span class="chip c-ok"><span class="cdot"></span>OK</span></div></div>' +
+      toggleRow('Auto pH Correction','',true) +
+      toggleRow('Heat Reuse Pipeline','',true) +
+      toggleRow('Auto Shutoff','Triggers at 36°C outlet threshold',false)
+    );
+  }
+
+  // Write to DOM
+  const inputContent   = document.getElementById('input-content');
+  const operContent    = document.getElementById('operating-content');
+  const perfContent    = document.getElementById('performance-content');
+  const outContent     = document.getElementById('output-content');
+  const inpSwitcher    = document.getElementById('input-switcher');
+  const opSwitcher     = document.getElementById('operating-switcher');
+  const perfSwitcher   = document.getElementById('performance-switcher');
+  const outSwitcher    = document.getElementById('output-switcher');
+
+  if (inpSwitcher)  inpSwitcher.innerHTML  = switcherHTML;
+  if (opSwitcher)   opSwitcher.innerHTML   = switcherHTML;
+  if (perfSwitcher) perfSwitcher.innerHTML = switcherHTML;
+  if (outSwitcher)  outSwitcher.innerHTML  = switcherHTML;
+
+  if (inputContent)  inputContent.innerHTML  = banner + '<div' + disable + '>' + inputHTML + '</div>';
+  if (operContent)   operContent.innerHTML   = banner + '<div' + disable + '>' + opHTML    + '</div>';
+  if (perfContent)   perfContent.innerHTML   = banner + perfHTML;
+  if (outContent)    outContent.innerHTML    = banner + '<div' + disable + '>' + outHTML   + '</div>';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ADD / EDIT / DELETE MODALS
+// ══════════════════════════════════════════════════════════════
+function openAddModal() {
+  editingIdx = null;
+  document.getElementById('modal-title').textContent = '➕ Add New System';
+  clearForm();
+  const nums = systems.map(s => parseInt(s.id.replace(/\D/g,''))).filter(n => !isNaN(n));
+  const next = nums.length ? Math.max(...nums) + 1 : 1;
+  document.getElementById('form-id').value = 'LTPCS-' + String(next).padStart(3,'0');
+  document.getElementById('addModal').classList.add('open');
+}
+
+function openEditModal(idx) {
+  editingIdx = idx;
+  const s = systems[idx];
+  document.getElementById('modal-title').textContent = '✏️ Edit System';
+  document.getElementById('form-name').value   = s.name;
+  document.getElementById('form-id').value     = s.id;
+  document.getElementById('form-type').value   = s.type;
+  document.getElementById('form-loc').value    = s.loc;
+  document.getElementById('form-intemp').value = s.intemp;
+  document.getElementById('form-flow').value   = s.flow;
+  document.getElementById('form-load').value   = s.load;
+  document.getElementById('form-eff').value    = s.eff;
+  document.getElementById('form-status').value = s.status;
+  document.getElementById('form-notes').value  = s.notes || '';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+
+function clearForm() {
+  ['form-name','form-id','form-loc','form-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('form-intemp').value = '80';
+  document.getElementById('form-flow').value   = '2000';
+  document.getElementById('form-load').value   = '3.0';
+  document.getElementById('form-eff').value    = '92';
+  document.getElementById('form-type').value   = 'Cooling Tower';
+  document.getElementById('form-status').value = 'online';
+}
+
+function saveSystem() {
+  const name = document.getElementById('form-name').value.trim();
+  const id   = document.getElementById('form-id').value.trim();
+  if (!name || !id) { toast('⚠ Name and ID are required.'); return; }
+  const sys = {
+    id, name,
+    type:   document.getElementById('form-type').value,
+    loc:    document.getElementById('form-loc').value.trim() || 'Unspecified Location',
+    intemp: parseFloat(document.getElementById('form-intemp').value) || 80,
+    flow:   parseInt(document.getElementById('form-flow').value)    || 2000,
+    load:   parseFloat(document.getElementById('form-load').value)  || 3.0,
+    eff:    parseFloat(document.getElementById('form-eff').value)   || 92,
+    status: document.getElementById('form-status').value,
+    notes:  document.getElementById('form-notes').value.trim(),
+  };
+  // Reset state for this system so it picks up new values
+  delete STATE[sys.id];
+  if (editingIdx !== null) {
+    systems[editingIdx] = sys;
+    toast('System updated: ' + sys.name);
+  } else {
+    systems.push(sys);
+    activeSystemIdx = systems.length - 1;
+    toast('System added: ' + sys.name);
+  }
+  closeModal();
+  renderAll();
+}
+
+function openDelModal(idx) {
+  deletingIdx = idx;
+  const el = document.getElementById('del-sys-name');
+  if (el) el.textContent = systems[idx].name;
+  document.getElementById('delModal').classList.add('open');
+}
+function closeDelModal() { document.getElementById('delModal').classList.remove('open'); deletingIdx = null; }
+function confirmDelete() {
+  if (deletingIdx === null) return;
+  const name = systems[deletingIdx].name;
+  STOPPED.delete(systems[deletingIdx].id);
+  delete STATE[systems[deletingIdx].id];
+  systems.splice(deletingIdx, 1);
+  if (activeSystemIdx >= systems.length) activeSystemIdx = Math.max(0, systems.length - 1);
+  closeDelModal();
+  renderAll();
+  toast('Deleted: ' + name);
+}
+
+function deleteActiveSystem() { openDelModal(activeSystemIdx); }
+
+function removeOfflineSystems() {
+  const toRemove = systems.filter(s => s.status === 'offline' || s.status === 'maintenance');
+  if (!toRemove.length) { toast('⚠ No offline or maintenance stations to remove.'); return; }
+  if (!confirm('Remove ' + toRemove.length + ' station(s)?\n' + toRemove.map(s=>s.name).join(', ') + '\n\nThis cannot be undone.')) return;
+  toRemove.forEach(s => { STOPPED.delete(s.id); delete STATE[s.id]; });
+  const ids = toRemove.map(s => s.id);
+  systems = systems.filter(s => !ids.includes(s.id));
+  if (activeSystemIdx >= systems.length) activeSystemIdx = Math.max(0, systems.length - 1);
+  renderAll();
+  toast('🗑 Removed ' + toRemove.length + ' station(s).');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  AUTH ENGINE
+// ══════════════════════════════════════════════════════════════
+const VALID_USERS = [
+  { username:'jreyes',   password:'ltpcs2026', name:'Jose Reyes',   role:'Chief Engineer' },
+  { username:'ENG-0042', password:'ltpcs2026', name:'Jose Reyes',   role:'Chief Engineer' },
+  { username:'msantos',  password:'ltpcs2026', name:'Maria Santos', role:'Operator'       },
+  { username:'admin',    password:'admin2026', name:'System Admin',  role:'Administrator'  },
+];
+let authAction = null, authContext = null, authAttempts = 0, authLocked = false;
+const MAX_AUTH = 3;
+const actionDesc = { clearSelected:'🗑 Clear selected log entries', selectAll:'☑ Select all log entries', selectAllTab:'☑ Select all in this tab', markResolved:'✓ Mark selected as Resolved' };
+
+function requestAuth(action, context) {
+  if (authLocked) { toast('⛔ Too many failed attempts.'); return; }
+  authAction = action; authContext = context; authAttempts = 0;
+  ['auth-user','auth-pass'].forEach(id => { const el = document.getElementById(id); if(el){el.value='';el.classList.remove('error');} });
+  const ae = document.getElementById('auth-error'); if(ae) ae.classList.remove('show');
+  const at = document.getElementById('auth-attempts-txt'); if(at) at.textContent='';
+  const ai = document.getElementById('auth-icon'); if(ai){ai.textContent='🔒';ai.classList.remove('lock-icon-animate');}
+  const ad = document.getElementById('auth-action-desc'); if(ad) ad.textContent = actionDesc[action] || 'Sensitive action';
+  document.getElementById('authModal').classList.add('open');
+  setTimeout(() => document.getElementById('auth-user')?.focus(), 350);
+}
+function closeAuthModal() { document.getElementById('authModal').classList.remove('open'); authAction=null; authContext=null; }
+function submitAuth() {
+  const usr = document.getElementById('auth-user')?.value.trim();
+  const pwd = document.getElementById('auth-pass')?.value;
+  const ue  = document.getElementById('auth-user');
+  const pe  = document.getElementById('auth-pass');
+  const ae  = document.getElementById('auth-error');
+  const ai  = document.getElementById('auth-icon');
+  if (!usr || !pwd) { ue?.classList.toggle('error',!usr); pe?.classList.toggle('error',!pwd); if(ae){ae.textContent='⚠ Enter both fields.';ae.classList.add('show');} return; }
+  const user = VALID_USERS.find(u => u.username.toLowerCase() === usr.toLowerCase() && u.password === pwd);
+  if (user) {
+    ae?.classList.remove('show'); ue?.classList.remove('error'); pe?.classList.remove('error');
+    if(ai) ai.textContent='🔓';
+    closeAuthModal(); authAttempts=0;
+    toast('✓ Verified as ' + user.name);
+    setTimeout(executeAuthAction, 200);
+  } else {
+    authAttempts++;
+    ue?.classList.add('error'); pe?.classList.add('error');
+    if(pe) pe.value='';
+    if(ai){ai.classList.remove('lock-icon-animate');void ai.offsetWidth;ai.classList.add('lock-icon-animate');}
+    const rem = MAX_AUTH - authAttempts;
+    if (authAttempts >= MAX_AUTH) {
+      authLocked = true;
+      if(ae){ae.textContent='⛔ Locked after '+MAX_AUTH+' failed attempts.';ae.classList.add('show');}
+      setTimeout(()=>{authLocked=false;authAttempts=0;toast('🔓 Account unlocked.');},30000);
+      closeAuthModal();
+    } else {
+      if(ae){ae.textContent='⚠ Incorrect. '+rem+' attempt'+(rem>1?'s':'')+' remaining.';ae.classList.add('show');}
+      const at=document.getElementById('auth-attempts-txt'); if(at) at.textContent='Attempt '+authAttempts+' of '+MAX_AUTH;
+      setTimeout(()=>document.getElementById('auth-pass')?.focus(),100);
+    }
+  }
+}
+function executeAuthAction() {
+  if (!authAction) return;
+  const action=authAction, context=authContext;
+  authAction=null; authContext=null;
+  if (action==='selectAll') { ['active','event','resolved'].forEach(t=>alertData[t].forEach(i=>i.selected=true)); renderAlerts(); toast('All selected.'); return; }
+  if (action==='selectAllTab') { const all=alertData[context].every(i=>i.selected); alertData[context].forEach(i=>i.selected=!all); renderAlerts(); toast(all?'Deselected.':'Selected.'); return; }
+  if (action==='markResolved') {
+    const tab=context||'active'; const toRes=alertData[tab].filter(i=>i.selected);
+    if(!toRes.length){toast('⚠ None selected.');return;}
+    toRes.forEach(item=>{item.resolved=true;item.selected=false;alertData.resolved.unshift({...item,time:new Date().toTimeString().split(' ')[0],resolved:true,selected:false});});
+    alertData[tab]=alertData[tab].filter(i=>!i.resolved); renderAlerts(); toast('✓ '+toRes.length+' resolved.'); return;
+  }
+  if (action==='clearSelected') {
+    const tabs=context==='alerts'?['active','event','resolved']:[context];
+    let cleared=0;
+    tabs.forEach(t=>{const b=alertData[t].length;alertData[t]=alertData[t].filter(i=>!i.selected);cleared+=b-alertData[t].length;});
+    if(!cleared){toast('⚠ None selected.');return;}
+    alertData.event.unshift({id:'EVT-'+Date.now().toString().slice(-4),time:new Date().toTimeString().split(' ')[0],sev:'info',msg:cleared+' entries cleared by verified user',sub:'Auth confirmed · '+new Date().toDateString(),selected:false});
+    renderAlerts(); toast('🗑 '+cleared+' cleared.'); return;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ALERTS & LOGS ENGINE
+// ══════════════════════════════════════════════════════════════
+const sevConfig = {
+  critical:{icon:'🔴',cls:'sev-critical',label:'CRITICAL'},
+  high:    {icon:'🟠',cls:'sev-high',    label:'HIGH'    },
+  medium:  {icon:'🟡',cls:'sev-medium',  label:'MEDIUM'  },
+  low:     {icon:'🔵',cls:'sev-low',     label:'LOW'     },
+  info:    {icon:'✅',cls:'sev-info',    label:'INFO'    },
+};
+let alertData = {
+  active:[
+    {id:'ALT-001',time:'14:32',sev:'critical',msg:'Effluent temp near limit — Outlet B3',sub:'TEMP-B3: 84.3°C · LIMIT: 86°C',selected:false,resolved:false},
+    {id:'ALT-002',time:'13:18',sev:'high',    msg:'Heat load +8% — check bypass valve V-12',sub:'VALVE-V12: 62% open',selected:false,resolved:false},
+    {id:'ALT-003',time:'11:44',sev:'medium',  msg:'HX-1 fouling detected — efficiency -1.6%',sub:'HX-1: 88.4% · TARGET: ≥90%',selected:false,resolved:false},
+  ],
+  event:[
+    {id:'EVT-001',time:'14:32',sev:'high',  msg:'Temp alert triggered at Outlet B3',sub:'Auto-notified: J. Reyes, M. Santos',selected:false},
+    {id:'EVT-002',time:'09:15',sev:'info',  msg:'Daily EPA compliance report generated',sub:'TPR-20260228 · Status: PASS',selected:false},
+    {id:'EVT-003',time:'08:00',sev:'info',  msg:'System startup — all subsystems nominal',sub:'Day shift handover — J. Reyes',selected:false},
+  ],
+  resolved:[],
+};
+let currentLogTab = 'active';
+
+function renderAlerts() {
+  renderLogList('active',   'active-alerts-list',  'cb-all-active');
+  renderLogList('event',    'event-log-list',       'cb-all-event');
+  renderLogList('resolved', 'resolved-list',        'cb-all-resolved');
+  updateAlertCounts();
+  updateGlobalClearBtn();
+}
+function renderLogList(type, containerId, cbAllId) {
+  const container = document.getElementById(containerId);
+  const items     = alertData[type];
+  if (!container) return;
+  if (type==='resolved') {
+    const empty = document.getElementById('resolved-empty');
+    if (!items.length) { container.innerHTML=''; if(empty)empty.style.display='block'; return; }
+    if (empty) empty.style.display='none';
+  }
+  container.innerHTML = items.map(item => {
+    const sc = sevConfig[item.sev] || sevConfig.info;
+    const res = item.resolved || type==='resolved';
+    return '<div class="log-item-wrap'+(item.selected?' selected':'')+(res?' resolved':'')+'" onclick="toggleSelect(\''+type+'\',\''+item.id+'\')" data-id="'+item.id+'">' +
+      '<div class="cb '+(item.selected?'checked':'')+'" style="margin-top:2px;flex-shrink:0"></div>' +
+      '<div class="log-severity"><div class="sev-icon">'+sc.icon+'</div><div class="sev-badge '+sc.cls+'">'+sc.label+'</div></div>' +
+      '<div class="log-content"><div style="display:flex;align-items:center;gap:6px"><span class="log-t">'+item.time+'</span><span style="font-family:\'Share Tech Mono\',monospace;font-size:.58rem;color:var(--muted)">'+item.id+'</span></div>' +
+      '<div class="log-msg-text" style="font-size:.8rem;margin-top:2px;color:var(--text)">'+item.msg+'</div>' +
+      '<div class="log-sub" style="margin-top:2px">'+item.sub+'</div>' +
+      (res?'<span class="chip c-ok log-status-chip" style="display:inline-flex;margin-top:4px"><span class="cdot"></span>RESOLVED</span>':'') +
+      '</div></div>';
+  }).join('');
+  const cbAll = document.getElementById(cbAllId);
+  if (cbAll) cbAll.classList.toggle('checked', items.length > 0 && items.every(i => i.selected));
+}
+function toggleSelect(type, id) {
+  const item = alertData[type].find(i => i.id === id);
+  if (item) { item.selected = !item.selected; renderAlerts(); }
+}
+function updateAlertCounts() {
+  const ac = alertData.active.length;
+  const ec = alertData.event.length;
+  const rc = alertData.resolved.length;
+  set$('active-count-lbl',   '(' + ac + ')');
+  set$('event-count-lbl',    '(' + ec + ')');
+  set$('resolved-count-lbl', '(' + rc + ')');
+  const nb = document.querySelector('#bn-alerts .bn-badge');
+  if (nb) { nb.textContent=ac; nb.style.display=ac>0?'flex':'none'; }
+  const nd = document.querySelector('.notif-dot');
+  if (nd) { nd.textContent=ac; nd.style.display=ac>0?'flex':'none'; }
+}
+function updateGlobalClearBtn() {
+  const total = ['active','event','resolved'].reduce((n,t) => n + alertData[t].filter(i=>i.selected).length, 0);
+  const btn   = document.getElementById('btn-clear-sel');
+  const badge = document.getElementById('sel-count-badge');
+  if (btn)   btn.disabled = total===0;
+  if (badge) { badge.textContent=total; badge.style.display=total>0?'inline-flex':'none'; }
+}
+function switchLogTab(tab) {
+  currentLogTab = tab;
+  ['active','event','resolved'].forEach(t => {
+    document.getElementById('ltab-'+t)?.classList.toggle('active', t===tab);
+    document.getElementById('ltab-content-'+t)?.classList.toggle('active', t===tab);
+  });
+}
+
+// ── Init
+initAllStates();
+renderAll();
+renderAlerts();
+
+</script>
+</body>
+</html>
