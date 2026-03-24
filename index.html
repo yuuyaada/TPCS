@@ -1223,14 +1223,75 @@ body.light .theme-toggle-row { border-bottom-color:rgba(0,0,0,.06); }
 
   <!-- Water Quality -->
   <div class="card pond-border">
-    <div class="ct pond-ct">A · Water Quality Inputs</div>
-    <div class="ctrl"><div class="ctrl-top"><div class="cl">INFLOW TEMPERATURE</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-it">52.4</span><span class="cu">°C</span></div></div><input type="range" class="sl-pond" min="20" max="90" step=".5" value="52.4" style="--p:45%" oninput="sv('v-pond-it',this,20,90,1)"></div>
-    <div class="ctrl"><div class="ctrl-top"><div class="cl">INFLOW RATE</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-fl">3200</span><span class="cu">L/min</span></div></div><input type="range" class="sl-pond" min="500" max="6000" step="10" value="3200" style="--p:49%" oninput="sv('v-pond-fl',this,500,6000,0)"></div>
-    <div class="ctrl"><div class="ctrl-top"><div class="cl">INFLOW pH</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-ph">7.1</span><span class="cu">pH</span></div></div><input type="range" class="sl-pond" min="5" max="10" step=".1" value="7.1" style="--p:42%" oninput="sv('v-pond-ph',this,5,10,1)"></div>
-    <div class="ctrl"><div class="ctrl-top"><div class="cl">SUSPENDED SOLIDS (TSS)</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-ts">62</span><span class="cu">mg/L</span></div></div><input type="range" class="sl-pond" min="0" max="300" step="1" value="62" style="--p:21%" oninput="sv('v-pond-ts',this,0,300,0)"></div>
-    <div class="ctrl"><div class="ctrl-top"><div class="cl">DISSOLVED OXYGEN (DO)</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-do">6.8</span><span class="cu">mg/L</span></div></div><input type="range" class="sl-pond" min="0" max="14" step=".1" value="6.8" style="--p:49%" oninput="sv('v-pond-do',this,0,14,1)"></div>
-    <div class="ctrl"><div class="ctrl-top"><div class="cl">CONDUCTIVITY</div><div class="cv-wrap"><span class="cv" style="color:#00c9a7" id="v-pond-cond">420</span><span class="cu">µS/cm</span></div></div><input type="range" class="sl-pond" min="50" max="1000" step="5" value="420" style="--p:39%" oninput="sv('v-pond-cond',this,50,1000,0)"></div>
+  <div class="ct pond-ct">A · Water Quality Inputs</div>
+
+  <div class="ctrl">
+    <div class="ctrl-top">
+      <div class="cl" style="flex:1;word-break:break-word;">INFLOW TEMPERATURE</div>
+      <div class="cv-wrap" style="min-width:70px;display:flex;justify-content:flex-end;align-items:baseline;gap:4px;">
+        <span class="cv" style="color:#00c9a7" id="v-pond-it">52.4</span>
+        <span class="cu">°C</span>
+      </div>
+    </div>
+    <input type="range" class="sl-pond" min="20" max="90" step=".5" value="52.4" style="width:100%;--p:45%" oninput="sv('v-pond-it',this,20,90,1)">
   </div>
+
+  <div class="ctrl">
+    <div class="ctrl-top">
+      <div class="cl" style="flex:1;word-break:break-word;">INFLOW RATE</div>
+      <div class="cv-wrap" style="min-width:70px;display:flex;justify-content:flex-end;align-items:baseline;gap:4px;">
+        <span class="cv" style="color:#00c9a7" id="v-pond-fl">3200</span>
+        <span class="cu">L/min</span>
+      </div>
+    </div>
+    <input type="range" class="sl-pond" min="500" max="6000" step="10" value="3200" style="width:100%;--p:49%" oninput="sv('v-pond-fl',this,500,6000,0)">
+  </div>
+
+  <div class="ctrl">
+    <div class="ctrl-top">
+      <div class="cl" style="flex:1;word-break:break-word;">INFLOW pH</div>
+      <div class="cv-wrap" style="min-width:70px;display:flex;justify-content:flex-end;align-items:baseline;gap:4px;">
+        <span class="cv" style="color:#00c9a7" id="v-pond-ph">7.1</span>
+        <span class="cu">pH</span>
+      </div>
+    </div>
+    <input type="range" class="sl-pond" min="5" max="10" step=".1" value="7.1" style="width:100%;--p:42%" oninput="sv('v-pond-ph',this,5,10,1)">
+  </div>
+
+  <div class="ctrl">
+    <div class="ctrl-top">
+      <div class="cl" style="flex:1;word-break:break-word;">SUSPENDED SOLIDS (TSS)</div>
+      <div class="cv-wrap" style="min-width:70px;display:flex;justify-content:flex-end;align-items:baseline;gap:4px;">
+        <span class="cv" style="color:#00c9a7" id="v-pond-ts">62</span>
+        <span class="cu">mg/L</span>
+      </div>
+    </div>
+    <input type="range" class="sl-pond" min="0" max="300" step="1" value="62" style="width:100%;--p:21%" oninput="sv('v-pond-ts',this,0,300,0)">
+  </div>
+
+  <div class="ctrl">
+    <div class="ctrl-top">
+      <div class="cl" style="flex:1;word-break:break-word;">DISSOLVED OXYGEN (DO)</div>
+      <div class="cv-wrap" style="min-width:70px;display:flex;justify-content:flex-end;align-items:baseline;gap:4px;">
+        <span class="cv" style="color:#00c9a7" id="v-pond-do">6.8</span>
+        <span class="cu">mg/L</span>
+      </div>
+    </div>
+    <input type="range" class="sl-pond" min="0" max="14" step=".1" value="6.8" style="width:100%;--p:49%" oninput="sv('v-pond-do',this,0,14,1)">
+  </div>
+
+  <div class="ctrl">
+    <div class="ctrl-top">
+      <div class="cl" style="flex:1;word-break:break-word;">CONDUCTIVITY</div>
+      <div class="cv-wrap" style="min-width:70px;display:flex;justify-content:flex-end;align-items:baseline;gap:4px;">
+        <span class="cv" style="color:#00c9a7" id="v-pond-cond">420</span>
+        <span class="cu">µS/cm</span>
+      </div>
+    </div>
+    <input type="range" class="sl-pond" min="50" max="1000" step="5" value="420" style="width:100%;--p:39%" oninput="sv('v-pond-cond',this,50,1000,0)">
+  </div>
+
+</div>
 
   <!-- Pond Operating Variables -->
   <div class="card pond-border">
